@@ -1,10 +1,10 @@
 Dependencies
 ------------
-cython
-numpy v1.8 or later
-netCDF4
-pyproj
-geoarray
+- cython
+- numpy v1.8 or later
+- netCDF4
+- pyproj
+- PYTHON_ufz_lib
 
 Installation
 ------------
