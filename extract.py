@@ -84,6 +84,7 @@ def gridBasinMask(gauge):
 
 def openNcFiles(flist):
     out = {}
+    flist = flist or ()
     for fdict in flist:
         fitem = NcFile(**fdict)
         out[fitem] = NcDimDataset(
@@ -95,6 +96,7 @@ def openNcFiles(flist):
 
 def openGridFiles(flist):
     out = {}
+    flist = flist or ()
     for fdict in flist:
         out[GridFile(**fdict)] = ga.fromfile(fdict["fname"])
     return out
