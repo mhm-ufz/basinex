@@ -169,8 +169,7 @@ def main(config, gauges):
 
             if not gauge:
                 warnings.warn(
-                    "Failed to match gauge '{:}' to the flowaccumulation grid"
-                    .format(gauge.id))
+                    "Failed to match the gauge to the flow accumulation grid")
                 continue
 
             logging.debug("generating basin mask")
