@@ -2,19 +2,21 @@
 # -*- coding: utf-8 -*-
 
 import os
+import warnings
+import logging
 from argparse import ArgumentParser
+
 import yaml
 import numpy as np
+
 from ufz.netcdf4 import NcDataset
 from lib import geoarray as ga
 from lib.netcdf import NcDimDataset
 from lib.gauges import readGauges, matchFlowacc
 from lib.wrapper import NcFile, GridFile
+
 from extractor import extract
-import warnings
 
-
-INPUT = "input.yml"
 
 
 def readConfig(fname):
@@ -27,7 +29,7 @@ def readConfig(fname):
             raise RuntimeError("Syntactic error in {:}".format(fname))
     return out
 
-        
+
 def gaugeBasinMask(flowdir, gauge):
     gauge_idx = flowdir.indexOf(gauge.y, gauge.x)
 
@@ -86,6 +88,7 @@ def openGridFiles(flist):
 def writeFiles(bpath, fdict):
     for fitem, fobj in fdict.items():
         path = os.path.join(bpath, fitem.outpath or "")
+        logging.debug("writing file: %s", path)
         if not os.path.isdir(path):
             os.makedirs(path)
         fobj.tofile(os.path.join(path, os.path.split(fitem.fname)[-1]))
@@ -120,6 +123,7 @@ def gaugeGrid(grid_template, gauge):
 def sameExtend(fobjs):
     bbox = commonBbox(fobjs)
     for fobj in fobjs:
+        # print fobj.bbox, fobj.cellsize
         if fobj.bbox != bbox:
             return False
     return True
@@ -146,17 +150,21 @@ def maskData(data, mask):
 def main(config, gauges):
 
     for gauge in gauges:
+        logging.info("processing gauge: %s", gauge.id)
 
         filedict={}
 
         if not gauge.path:
 
             # create mask if not given
+            logging.debug("reading flow accumulation")
             flowacc = ga.fromfile(config["flowacc"]).astype(np.int32)
+
+            logging.debug("reading flow direction")
             flowdir = ga.fromfile(config["flowdir"]).astype(np.int32)
 
             if gauge.size:
-                # extract a single cell
+                logging.debug("moving gauge to streamflow")
                 gauge = matchFlowacc(gauge, flowacc, **config["matching"])
 
             if not gauge:
@@ -170,6 +178,7 @@ def main(config, gauges):
 
             # write gauge grid if desired
             if "gauge" in config:
+                logging.debug("writing gauge file")
                 fitem = GridFile(
                     fname=config["gauge"].get("fname", "idgauges.asc"),
                     outpath=config["gauge"].get("outpath"))
@@ -177,6 +186,7 @@ def main(config, gauges):
                 filedict[fitem] = maskData(gaugefile, mask)
 
         else:
+            logging.debug("reding gauge file")
             mask = gridBasinMask(gauge)
 
         for fdict in config["gridfiles"]:
@@ -194,13 +204,16 @@ def main(config, gauges):
 
         # write mask grid if desired
         if "mask" in config:
+            logging.debug("writing mask file")
             fitem = GridFile(
                 fname=config["mask"].get("fname", "mask.asc"),
                 outpath=config["mask"].get("outpath"))
             filedict[fitem] = mask
 
+        logging.debug("finding common extend")
         bbox = commonBbox(filedict.values())
 
+        logging.debug("enlarging data to common extend")
         filedict = enlargeFiles(filedict, bbox)
 
         if not sameExtend(filedict.values()):
@@ -208,24 +221,43 @@ def main(config, gauges):
 
         bpath = os.path.join(config["outpath"], gauge.id)
         writeFiles(bpath, filedict)
+        logging.debug("writing report")
         writeReport(bpath, mask, config["matching"]["scaling_factor"])
-    
 
-if __name__ == "__main__":
 
-    parser = ArgumentParser(description="Extract basins")
+def initArgparser():
+
+    parser = ArgumentParser(description="mHM basin extractor")
 
     parser.add_argument(
-        "-n", required=False, dest="line", type=int,
+        "-n", "--line", type=int,
         help=("the gauge to extract, given as its (0-based) "
               "line number in the look up table"))
 
-    args = parser.parse_args()
-    line = args.line
+    parser.add_argument(
+        "-i", "--input", default="input.yml",
+        help="the input yaml file to read")
 
-    config = readConfig(INPUT)
+    parser.add_argument(
+        "-v", "--verbose", default=False, action="store_true",
+        help="give some status output")
+
+    return parser
+
+
+if __name__ == "__main__":
+
+    parser = initArgparser()
+    args = parser.parse_args()
+
+    logging.basicConfig(
+        format="%(message)s",
+        level=logging.DEBUG if args.verbose else logging.INFO)
+
+    config = readConfig(args.input)
 
     # command line option -n
+    line = args.line
     gauges = readGauges(config["gauges"])
     if line:
         if line > len(gauges)-1:
