@@ -208,7 +208,7 @@ class NcDimDataset(NcDataset):
                           for d in var.dimensions]
                 # do it the clunky way because of a slicing bug in netCDF4
                 data = newvar[:]
-                data[slices] = var.fill_value
+                data[tuple(slices)] = var.fill_value
                 newvar[:] = data
         return nc
 

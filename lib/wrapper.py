@@ -11,7 +11,7 @@ class NcFile(object):
         self.outpath = outpath
         self.y_shift = y_shift
         self.x_shift = x_shift
-    
+
 
 class GridFile(object):
     def __init__(self, fname, outpath=None):
