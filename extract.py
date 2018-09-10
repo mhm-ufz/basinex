@@ -63,23 +63,6 @@ def gridBasinMask(gauge):
                 cellsize=nc.cellsize
             )
     return out.setMask(out <= 0)
-      
-
-# def openFiles(flist):
-#     out = {}
-#     for fdict in flist:
-            
-#         try:
-#             fitem = GridFile(**fdict)
-#             out[fitem] = ga.fromfile(fitem.fname)
-#             # fobj = ga.fromfile(fitem.fname)
-#         except TypeError:
-#             fitem = NcFile(**fdict)
-#             out[fitem] = NcDimDataset(
-#                 fitem.fname, "r", fitem.ydim, fitem.xdim,
-#                 y_shift=fitem.y_shift, x_shift=fitem.x_shift)
-
-#     return out
 
 
 def openNcFiles(flist):
@@ -98,7 +81,7 @@ def openGridFiles(flist):
     for fdict in flist:
         out[GridFile(**fdict)] = ga.fromfile(fdict["fname"])
     return out
- 
+
 
 def writeFiles(bpath, fdict):
     for fitem, fobj in fdict.items():
@@ -106,29 +89,6 @@ def writeFiles(bpath, fdict):
         if not os.path.isdir(path):
             os.makedirs(path)
         fobj.tofile(os.path.join(path, os.path.split(fitem.fname)[-1]))
-
-
-def shrinkFiles(fdict, mask):
-    out = {}
-    for fitem, fobj in fdict.items():
-        out[fitem] = fobj.shrink(**mask.bbox)
-    return out
-
-
-def maskFiles(fdict, mask):
-    # mask: a geoarray instance
-    out = {}
-    for fitem, fobj in fdict.items():
-        if all(x == y for x, y in zip(mask.cellsize, fobj.cellsize)):
-            out[fitem] = fobj.setMask(mask.mask)
-        else:
-
-            enlarged_mask = mask.enlarge(**fobj.bbox).astype(float)
-            rescaled_mask = ga.rescale(
-                enlarged_mask, abs(fobj.cellsize[0]/mask.cellsize[0]),
-                func='average').copy()
-            out[fitem] = fobj.setMask(rescaled_mask.mask)
-    return out
 
 
 def enlargeFiles(fdict, bbox):
@@ -172,31 +132,22 @@ def writeReport(bpath, mask, scaling_factor):
         f.write("calculated_catchment_size: {:}\n".format(size))
 
 
-# def readExtractFile(fname):
+def maskData(data, mask):
+    if all(x == y for x, y in zip(mask.cellsize, data.cellsize)):
+        return data.setMask(mask.mask)
 
-#     def _clearRow(string):
-#         return [v.strip() for v in string.split(";")]
-
-#     out = []
-#     with open(fname, "r") as f:
-#         header = _clearRow(f.readline())
-#         for line in f:
-#             row = _clearRow(line)
-#             kwargs = dict(zip(header, row))
-#             if "ydim" in kwargs and "xdim" in kwargs:
-#                 fobj = NcFile(**kwargs)
-#             else:
-#                 fobj = GridFile(**kwargs)
-
-#             out.append(fobj)
-#     return out
+    enlarged_mask = mask.enlarge(**data.bbox).astype(float)
+    rescaled_mask = ga.rescale(
+        enlarged_mask, abs(data.cellsize[0]/mask.cellsize[0]),
+        func='average').copy()
+    return data.setMask(rescaled_mask.mask)
 
 
 def main(config, gauges):
 
     for gauge in gauges:
 
-        fdict = {}
+        filedict={}
 
         if not gauge.path:
 
@@ -214,39 +165,49 @@ def main(config, gauges):
                     .format(gauge.id))
                 continue
 
+            logging.debug("generating basin mask")
+            mask = gaugeBasinMask(flowdir, gauge)
+
             # write gauge grid if desired
             if "gauge" in config:
                 fitem = GridFile(
                     fname=config["gauge"].get("fname", "idgauges.asc"),
                     outpath=config["gauge"].get("outpath"))
-                fdict[fitem] = gaugeGrid(flowacc, gauge)
-
-            mask = gaugeBasinMask(flowdir, gauge)
+                gaugefile = gaugeGrid(flowacc, gauge).shrink(**mask.bbox)
+                filedict[fitem] = maskData(gaugefile, mask)
 
         else:
             mask = gridBasinMask(gauge)
 
-        fdict.update(openGridFiles(config["gridfiles"]))
-        fdict.update(openNcFiles(config["ncfiles"]))
+        for fdict in config["gridfiles"]:
+            logging.debug("processing: %s", fdict["fname"])
+            griddata = ga.fromfile(fdict["fname"]).shrink(**mask.bbox)
+            filedict[GridFile(**fdict)] = maskData(griddata, mask)
+
+        for fdict in config["ncfiles"]:
+            logging.debug("processing: %s", fdict["fname"])
+            fitem = NcFile(**fdict)
+            ncdata = NcDimDataset(
+                fitem.fname, "r", fitem.ydim, fitem.xdim,
+                y_shift=fitem.y_shift, x_shift=fitem.x_shift)
+            filedict[NcFile(**fdict)] = maskData(ncdata.shrink(**mask.bbox), mask)
 
         # write mask grid if desired
         if "mask" in config:
             fitem = GridFile(
                 fname=config["mask"].get("fname", "mask.asc"),
                 outpath=config["mask"].get("outpath"))
-            fdict[fitem] = mask
+            filedict[fitem] = mask
 
-        fdict = shrinkFiles(fdict, mask)
-        fdict = maskFiles(fdict, mask)
+        bbox = commonBbox(filedict.values())
 
-        bbox = commonBbox(fdict.values())
-        fdict = enlargeFiles(fdict, bbox)
+        filedict = enlargeFiles(filedict, bbox)
 
-        if not sameExtend(fdict.values()):
+        if not sameExtend(filedict.values()):
             raise RuntimeError("incompatible cellsizes")
 
         bpath = os.path.join(config["outpath"], gauge.id)
-        writeFiles(bpath, fdict)
+        writeFiles(bpath, filedict)
         writeReport(bpath, mask, config["matching"]["scaling_factor"])
     
 
