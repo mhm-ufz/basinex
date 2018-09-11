@@ -212,12 +212,12 @@ def main(config, gauges):
             filedict[fitem] = mask
 
         logging.debug("finding common extend")
-        bbox = commonBbox(filedict.values())
+        bbox = commonBbox(tuple(filedict.values()))
 
         logging.debug("enlarging data to common extend")
         filedict = enlargeFiles(filedict, bbox)
 
-        if not sameExtend(filedict.values()):
+        if not sameExtend(tuple(filedict.values())):
             raise RuntimeError("incompatible cellsizes")
 
         bpath = os.path.join(config["outpath"], gauge.id)

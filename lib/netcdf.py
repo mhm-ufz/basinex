@@ -25,7 +25,7 @@ class NcDimDataset(NcDataset):
     def bbox(self):
         x = self.variables[self._x][:]
         y = self.variables[self._y][:]
-        ycs, xcs = map(abs, self.cellsize)
+        ycs, xcs = [abs(v) for v in self.cellsize]
 
         return {
             "ymin": np.min(y) - (ycs * (1 - self.y_shift)),
@@ -53,7 +53,7 @@ class NcDimDataset(NcDataset):
     def shrink(self, ymin, ymax, xmin, xmax):
 
         def _removeCells(ymin, ymax, xmin, xmax):
-            cellsize = map(lambda x: float(abs(x)), self.cellsize)
+            cellsize = [float(abs(v)) for v in self.cellsize]
             out = {
                 "top": int(
                     np.floor((self.bbox["ymax"] - ymax) / cellsize[0])),
@@ -108,8 +108,8 @@ class NcDimDataset(NcDataset):
     def enlarge(self, ymin, ymax, xmin, xmax):
 
         def _padCells(ymin, ymax, xmin, xmax):
-            cellsize = map(lambda x: float(abs(x)), self.cellsize)
-            
+            cellsize = [float(abs(v)) for v in self.cellsize]
+
             out = {
                 "top": int(np.ceil((ymax - self.bbox["ymax"]) / cellsize[0])),
                 "left": int(np.ceil((self.bbox["xmin"] - xmin) / cellsize[1])),
@@ -213,7 +213,7 @@ class NcDimDataset(NcDataset):
         return nc
 
     def _header(self):
-        fill_value = filter(None, self.fill_values.values()) or (None,)
+        fill_value = tuple(v for v in self.fill_values.values() if v) or (None,)
         return "\n".join(
             ["ncols\t{0}".format(len(self.variables[self._x])),
              "nrows\t{0}".format(len(self.variables[self._y])),
