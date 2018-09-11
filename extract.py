@@ -90,10 +90,11 @@ def openGridFiles(flist):
 def writeFiles(bpath, fdict):
     for fitem, fobj in fdict.items():
         path = os.path.join(bpath, fitem.outpath or "")
-        logging.debug("writing file: %s", path)
         if not os.path.isdir(path):
             os.makedirs(path)
-        fobj.tofile(os.path.join(path, os.path.split(fitem.fname)[-1]))
+        fname = os.path.join(path, os.path.split(fitem.fname)[-1])
+        logging.debug("writing file: %s", fname)
+        fobj.tofile(fname)
 
 
 def enlargeFiles(fdict, bbox):
