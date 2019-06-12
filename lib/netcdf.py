@@ -35,6 +35,13 @@ class NcDimDataset(NcDataset):
         }
 
     @property
+    def origin(self):
+        dy, dx = self.cellsize
+        origin = ("l" if dy >= 0 else "u",
+                  "l" if dx >= 0 else "r")
+        return "".join(origin)
+
+    @property
     def cellsize(self):
         if self._cellsize is None:
             y = self.variables[self._y][:2]
