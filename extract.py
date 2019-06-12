@@ -54,7 +54,9 @@ def gridBasinMask(gauge):
                 "Expected mask should not have more than 2 dimensions")
 
         y, x = var.dimensions
-        with NcDimDataset(gauge.path, ydim=y, xdim=x) as nc:
+        # NOTE: would be a good to have y_shift and x_shift
+        #        as optional fields in the gauge lut.
+        with NcDimDataset(gauge.path, ydim=y, xdim=x, y_shift=.5, x_shift=.5) as nc:
             origin = nc.origin
             out = ga.array(
                 nc.variables[gauge.varname][:],
@@ -126,7 +128,6 @@ def gaugeGrid(grid_template, gauge):
 def sameExtend(fobjs):
     bbox = commonBbox(fobjs)
     for fobj in fobjs:
-        # print fobj.bbox, fobj.cellsize
         if fobj.bbox != bbox:
             return False
     return True
