@@ -26,7 +26,7 @@ class Gauge(object):
 
 def readGauges(fname):
     keysets = {tuple(sorted(["id", "size", "y", "x"])),
-               tuple(sorted(["id", "path"]))}
+               tuple(sorted(["id", "path", "varname"]))}
     with open(fname) as f:
         reader = csv.DictReader(f, delimiter=";")
         out = []
