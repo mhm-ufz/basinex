@@ -2,7 +2,7 @@
 
 # Required: Output location, all data will be writen to outpath/gauge_id/
 outpath: /path/to/output/
-    
+
 # Required: flowaccumulation
 flowacc: /path/to/facc.asc
 
@@ -21,7 +21,7 @@ flowdir: /path/to/fdir.asc
 #       are required:
 #       'id':      an unique basin identifier
 #       'path':    path to the mask file
-#       'varname': name of the mask variable (optional, only needed if the 
+#       'varname': name of the mask variable (optional, only needed if the
 #                  mask is stored in a netcdf file)
 gauges: /path/to/lut.txt
 
@@ -34,29 +34,29 @@ gauges: /path/to/lut.txt
 #
 #     During gauge matching the flowaccumulation grid is searched for a cell
 #     with a corresponding basin size close to the given gauge basin size. The
-#     search radius will be increased succesively and can be limited to a 
+#     search radius will be increased succesively and can be limited to a
 #     maximum size. As soon as a matching cell is found (error between catchment
 #     sizes is smaller than the given maximum error) the search ends.
 matching:
     # scaling factor to account for the (possible) unit differences between the
     # flowaccumulation and the gauging data. In order to make the data comparable
     # the effective flowaccumulation will be caclulated as:
-    #     flowaccumulation_value * (cellsize * scaling_factor)²
+    #     flowaccumulation_value * (cellsize * scaling_factor)^2
     scaling_factor: .001
     # maximum distance [in map units] around a given gauging station location
     # to search for a matching cell
     max_distance: 800
-    # maximum error, as a fraction of the given basin size      
+    # maximum error, as a fraction of the given basin size
     max_error: 0.8
 
-# Optional: Write the delineated basin 
+# Optional: Write the delineated basin
 mask:
     # Optional: file name of the mask grid (default: 'mask.asc')
     fname: basin.asc
     # output subdirectory
     outpath: morph
 
-# Optional: Write the gauge basin 
+# Optional: Write the gauge basin
 gauge:
     # Optional: file name of the gauge grid (default: 'idgauges.asc')
     fname: idgauges.asc
@@ -69,10 +69,10 @@ gauge:
 #     currently only the formats ArcAscii and GeoTIFF are supported
 #     flow accumulation and flow direction won't be written unless listed here
 gridfiles:
-    - fname: /path/to/input/facc.asc 
+    - fname: /path/to/input/facc.asc
       # Optional: output subdirectory under outpath/gauge_id
       outpath: morph
-    - fname: /path/to/input/input1.asc 
+    - fname: /path/to/input/input1.asc
       outpath: morph
     - fname: /path/to/input/input2.asc
       outpath: luse
@@ -95,14 +95,14 @@ ncfiles:
       ydim: northing
       # Required: name of the (1D-) variable holding the x coordinates
       xdim: easting
-      # Optional: 
+      # Optional:
       #     Coordinates of spatial data are definied on a certain location
-      #     of the cell they belong to (e.g. upper or lower left corner). 
+      #     of the cell they belong to (e.g. upper or lower left corner).
       #     All the supported file formats handle coordinates transparently,
-      #     with excpetion of netcdf. 
+      #     with excpetion of netcdf.
       #
       #     To account for the flexibility the format offers, it is possible
-      #     to specify the fraction of a cell the origin is shifted from 
+      #     to specify the fraction of a cell the origin is shifted from
       #     the upper left corner in x and y direction.
       #
       #     The bounding box of the dataset (an imaginary box, that contains
