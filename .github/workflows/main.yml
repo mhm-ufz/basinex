@@ -94,12 +94,9 @@ jobs:
 
       - name: Install
         run: |
-          sudo add-apt-repository ppa:ubuntugis/ppa && sudo apt-get update
+          sudo add-apt-repository -y ppa:ubuntugis/ppa
           sudo apt-get update
-          sudo apt-get install gdal-bin
-          sudo apt-get install libgdal-dev
-          export CPLUS_INCLUDE_PATH=/usr/include/gdal
-          export C_INCLUDE_PATH=/usr/include/gdal
+          sudo apt-get install -y gdal-bin libgdal-dev
           python -m pip install --upgrade pip
           pip install GDAL==$(gdal-config --version | awk -F'[.]' '{print $1"."$2}')
           pip install --find-links dist/ basinex

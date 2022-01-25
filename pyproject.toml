@@ -28,7 +28,7 @@ target-version = [
 [tool.cibuildwheel]
 # Switch to using build
 build-frontend = "build"
-# Disable building PyPy wheels on all platforms and musllinux builds
-skip = "pp* *-musllinux_*"
+# Disable building PyPy wheels on all platforms, py310 on 32bit and musllinux builds
+skip = "pp* cp310-win32 cp310-manylinux_i686 *-musllinux_*"
 # prefer binaries
 environment = "PIP_PREFER_BINARY=1"
