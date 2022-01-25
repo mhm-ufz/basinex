@@ -29,11 +29,20 @@ target-version = [
 # Switch to using build
 build-frontend = "build"
 # Disable building PyPy wheels on all platforms, 32bit for py3.10 and musllinux builds
-skip = "pp* cp310-win32 cp310-manylinux_i686 *-musllinux_*"
-# Run the package tests using `pytest`
-test-extras = "test"
-test-command = "pytest -v {package}/tests"
-# Skip trying to test arm64 builds on Intel Macs
-test-skip = "*-macosx_arm64 *-macosx_universal2:arm64"
+skip = "pp* *-win32 *-musllinux_*"
+# Run the package tests with cli
+test-command = "basinex -h"
 # no wheels for linux-32bit anymore for numpy>=1.22
 environment = "PIP_PREFER_BINARY=1"
+
+# Install system library
+[tool.cibuildwheel.linux]
+before-build = [
+  "sudo add-apt-repository -y ppa:ubuntugis/ppa",
+  "sudo apt-get update",
+  "sudo apt-get install -y gdal-bin",
+  "sudo apt-get install -y libgdal-dev",
+  "export CPLUS_INCLUDE_PATH=/usr/include/gdal",
+  "export C_INCLUDE_PATH=/usr/include/gdal",
+  "pip install GDAL",
+]
