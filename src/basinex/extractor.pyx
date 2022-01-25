@@ -1,9 +1,11 @@
 cimport cython
+
 import numpy as np
+
 cimport numpy as np
-from libcpp.vector cimport vector
-from libcpp.stack cimport stack
 from libcpp.pair cimport pair
+from libcpp.stack cimport stack
+from libcpp.vector cimport vector
 
 ctypedef pair[long, long] index
 

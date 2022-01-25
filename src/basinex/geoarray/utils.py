@@ -4,7 +4,6 @@
 
 import numpy as np
 
-
 try:
     basestring
 except NameError:
@@ -20,15 +19,13 @@ def _broadcastTo(array, shape, dims):
     assert len(array.shape) == len(dims)
     assert len(set(dims)) == len(dims)  # no duplicates
     # handle negative indices
-    dims = [d if d >= 0 else d+len(shape) for d in dims]
+    dims = [d if d >= 0 else d + len(shape) for d in dims]
     # bring array to the desired dimensionality
-    slc = [slice(None, None, None) if i in dims else None
-           for i in range(len(shape))]
+    slc = [slice(None, None, None) if i in dims else None for i in range(len(shape))]
     return np.broadcast_to(array[tuple(slc)], shape)
 
 
 def _broadcastedMeshgrid(*arrays):
-
     def _toNd(array, n, pos=-1):
         """
         expand given 1D array to n dimensions,
@@ -43,10 +40,7 @@ def _broadcastedMeshgrid(*arrays):
 
     out = []
     for i, arr in enumerate(arrays):
-        tmp = np.broadcast_to(
-            _toNd(arr, len(shape), pos=i),
-            shape
-        )
+        tmp = np.broadcast_to(_toNd(arr, len(shape), pos=i), shape)
         # there should be a solution without transposing...
         out.append(tmp.T)
     return out
@@ -55,10 +49,10 @@ def _broadcastedMeshgrid(*arrays):
 def _tupelize(arg):
     out = arg
     if isinstance(out, basestring):
-        out = (out, )
+        out = (out,)
     if not isinstance(out, tuple):
         try:
             out = tuple(out)
         except TypeError:
-            out = (out, )
+            out = (out,)
     return out

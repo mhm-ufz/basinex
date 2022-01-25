@@ -12,34 +12,37 @@ This module provides initializer function for core.GeoArray
 """
 
 import numpy as np
+
 from .core import GeoArray
-from .gdalio import _fromFile, _fromDataset
+from .gdalio import _fromDataset, _fromFile
 from .gdalspatial import _Projection
-from .geotrans import _Geotrans, _Geolocation
+from .geotrans import _Geolocation, _Geotrans
 from .utils import _tupelize
+
 # from typing import Optional, Union, Tuple, Any, Mapping, AnyStr
 
 
-def array(data,               # type: Union[np.ndarray, GeoArray]
-          dtype      = None,  # type: Optional[Union[AnyStr, np.dtype]]
-          yorigin    = 0,     # type: Optional[float]
-          xorigin    = 0,     # type: Optional[float]
-          origin     = "ul",  # type: Optional[floatAnyStr]
-          fill_value = None,  # type: Optional[float]
-          cellsize   = 1,     # type: Optional[float]]
-          ycellsize  = None,  # type: Optional[float]
-          xcellsize  = None,  # type: Optional[float]
-          yparam     = 0,     # type: Optional[float]
-          xparam     = 0,     # type: Optional[float]
-          # geotrans   = None,  # type: Optional[_Geotrans]
-          yvalues    = None,  # type: Optional[np.ndarray]
-          xvalues    = None,  # type: Optional[np.ndarray]
-          proj       = None,  # type: Mapping[AnyStr, Union[AnyStr, float]]
-          mode       = "r",   # type: AnyStr
-          color_mode = "L",   # type: AnyStr
-          copy       = False, # type: bool
-          fobj       = None,  # type: Optional[osgeo.gdal.Dataset]
-):                            # type: (...) -> GeoArray
+def array(
+    data,  # type: Union[np.ndarray, GeoArray]
+    dtype=None,  # type: Optional[Union[AnyStr, np.dtype]]
+    yorigin=0,  # type: Optional[float]
+    xorigin=0,  # type: Optional[float]
+    origin="ul",  # type: Optional[floatAnyStr]
+    fill_value=None,  # type: Optional[float]
+    cellsize=1,  # type: Optional[float]]
+    ycellsize=None,  # type: Optional[float]
+    xcellsize=None,  # type: Optional[float]
+    yparam=0,  # type: Optional[float]
+    xparam=0,  # type: Optional[float]
+    # geotrans   = None,  # type: Optional[_Geotrans]
+    yvalues=None,  # type: Optional[np.ndarray]
+    xvalues=None,  # type: Optional[np.ndarray]
+    proj=None,  # type: Mapping[AnyStr, Union[AnyStr, float]]
+    mode="r",  # type: AnyStr
+    color_mode="L",  # type: AnyStr
+    copy=False,  # type: bool
+    fobj=None,  # type: Optional[osgeo.gdal.Dataset]
+):  # type: (...) -> GeoArray
     """
     Arguments
     ---------
@@ -69,7 +72,6 @@ def array(data,               # type: Union[np.ndarray, GeoArray]
     Create a GeoArray from data.
     """
 
-
     def _checkGeolocArray(array, diffaxis):
         array = np.asarray(array)
         diff = np.diff(array, axis=diffaxis)
@@ -90,43 +92,54 @@ def array(data,               # type: Union[np.ndarray, GeoArray]
 
         if ycellsize is None:
             ycellsize = cellsize[0]
-            if (origin[0] == "u" and ycellsize > 0) or (origin[0] == "l" and ycellsize < 0):
+            if (origin[0] == "u" and ycellsize > 0) or (
+                origin[0] == "l" and ycellsize < 0
+            ):
                 ycellsize *= -1
 
         if xcellsize is None:
             xcellsize = cellsize[-1]
-            if (origin[1] == "r" and xcellsize > 0) or (origin[0] == "l" and xcellsize < 0):
+            if (origin[1] == "r" and xcellsize > 0) or (
+                origin[0] == "l" and xcellsize < 0
+            ):
                 xcellsize *= -1
 
         # if geotrans is None:
         # NOTE: not to robust...
         geotrans = _Geotrans(
-            yorigin=yorigin, xorigin=xorigin,
-            ycellsize=ycellsize, xcellsize=xcellsize,
-            yparam=yparam, xparam=xparam,
-            origin=origin, shape=data.shape)
+            yorigin=yorigin,
+            xorigin=xorigin,
+            ycellsize=ycellsize,
+            xcellsize=xcellsize,
+            yparam=yparam,
+            xparam=xparam,
+            origin=origin,
+            shape=data.shape,
+        )
 
     proj = _Projection(proj)
 
     if isinstance(data, GeoArray):
         return GeoArray(
-            dtype      = dtype or data.dtype,
-            geotrans   = data.geotrans,
-            fill_value = fill_value or data.fill_value,
-            proj       = proj or data.proj,
-            mode       = mode or data.mode,
-            color_mode = color_mode or data.color_mode,
-            fobj       = data.fobj,
-            data       = data.data)
+            dtype=dtype or data.dtype,
+            geotrans=data.geotrans,
+            fill_value=fill_value or data.fill_value,
+            proj=proj or data.proj,
+            mode=mode or data.mode,
+            color_mode=color_mode or data.color_mode,
+            fobj=data.fobj,
+            data=data.data,
+        )
 
     return GeoArray(
-        data       = np.array(data, dtype=dtype, copy=copy),
-        geotrans   = geotrans,
-        fill_value = fill_value,
-        proj       = proj,
-        mode       = mode,
-        color_mode = color_mode,
-        fobj       = fobj,)
+        data=np.array(data, dtype=dtype, copy=copy),
+        geotrans=geotrans,
+        fill_value=fill_value,
+        proj=proj,
+        mode=mode,
+        color_mode=color_mode,
+        fobj=fobj,
+    )
 
 
 def zeros(shape, dtype=np.float64, *args, **kwargs):

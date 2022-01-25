@@ -1,21 +1,20 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import logging
 import os
 import warnings
-import logging
 from argparse import ArgumentParser
 
-import yaml
 import numpy as np
+import yaml
 
-from .netcdf4 import NcDataset
 from . import geoarray as ga
-from .netcdf import NcDimDataset
-from .gauges import readGauges, matchFlowacc
-from .wrapper import NcFile, GridFile
-
 from .extractor import extract
+from .gauges import matchFlowacc, readGauges
+from .netcdf import NcDimDataset
+from .netcdf4 import NcDataset
+from .wrapper import GridFile, NcFile
 
 
 def cli():
@@ -23,8 +22,8 @@ def cli():
     args = parser.parse_args()
 
     logging.basicConfig(
-        format="%(message)s",
-        level=logging.DEBUG if args.verbose else logging.INFO)
+        format="%(message)s", level=logging.DEBUG if args.verbose else logging.INFO
+    )
 
     config = readConfig(args.input)
 
@@ -32,9 +31,9 @@ def cli():
     line = args.line
     gauges = readGauges(config["gauges"])
     if line:
-        if line > len(gauges)-1:
+        if line > len(gauges) - 1:
             raise ValueError("Given line number exceeds table row count")
-        gauges = gauges[line:line+1]
+        gauges = gauges[line : line + 1]
 
     main(config, gauges)
 
@@ -54,10 +53,9 @@ def gaugeBasinMask(flowdir, gauge):
     gauge_idx = flowdir.indexOf(gauge.y, gauge.x)
 
     mask = np.asarray(
-        extract(
-            np.array(flowdir, dtype=np.int32, copy=True),
-            *gauge_idx),
-        dtype=np.int32)
+        extract(np.array(flowdir, dtype=np.int32, copy=True), *gauge_idx),
+        dtype=np.int32,
+    )
 
     mask[mask == 0] = flowdir.fill_value
     out = ga.array(mask, **flowdir.header)
@@ -70,13 +68,12 @@ def gridBasinMask(gauge):
         # Infer dimension/fill_value information from the file
         var = ncbase.variables[gauge.varname]
         if var.ndim > 2:
-            raise RuntimeError(
-                "Expected mask should not have more than 2 dimensions")
+            raise RuntimeError("Expected mask should not have more than 2 dimensions")
 
         y, x = var.dimensions
         # NOTE: would be a good to have y_shift and x_shift
         #        as optional fields in the gauge lut.
-        with NcDimDataset(gauge.path, ydim=y, xdim=x, y_shift=.5, x_shift=.5) as nc:
+        with NcDimDataset(gauge.path, ydim=y, xdim=x, y_shift=0.5, x_shift=0.5) as nc:
             origin = nc.origin
             out = ga.array(
                 nc.variables[gauge.varname][:],
@@ -84,7 +81,7 @@ def gridBasinMask(gauge):
                 xorigin=nc.bbox["xmin" if origin[1] == "l" else "xmax"],
                 origin=origin,
                 fill_value=var.fill_value,
-                cellsize=nc.cellsize
+                cellsize=nc.cellsize,
             )
     return out.setMask(out <= 0)
 
@@ -95,8 +92,13 @@ def openNcFiles(flist):
     for fdict in flist:
         fitem = NcFile(**fdict)
         out[fitem] = NcDimDataset(
-            fitem.fname, "r", fitem.ydim, fitem.xdim,
-            y_shift=fitem.y_shift, x_shift=fitem.x_shift)
+            fitem.fname,
+            "r",
+            fitem.ydim,
+            fitem.xdim,
+            y_shift=fitem.y_shift,
+            x_shift=fitem.x_shift,
+        )
 
     return out
 
@@ -154,8 +156,7 @@ def sameExtend(fobjs):
 
 
 def writeReport(bpath, mask, scaling_factor):
-    size = ((np.sum(~mask.mask) * np.prod(np.abs(mask.cellsize)))
-            * scaling_factor**2)
+    size = (np.sum(~mask.mask) * np.prod(np.abs(mask.cellsize))) * scaling_factor ** 2
     with open(os.path.join(bpath, "report.out"), "w") as f:
         f.write("calculated_catchment_size: {:}\n".format(size))
 
@@ -166,8 +167,8 @@ def maskData(data, mask):
 
     enlarged_mask = mask.enlarge(**data.bbox).astype(float)
     rescaled_mask = ga.rescale(
-        enlarged_mask, abs(data.cellsize[0]/mask.cellsize[0]),
-        func='average').copy()
+        enlarged_mask, abs(data.cellsize[0] / mask.cellsize[0]), func="average"
+    ).copy()
     return data.setMask(rescaled_mask.mask)
 
 
@@ -176,7 +177,7 @@ def main(config, gauges):
     for gauge in gauges:
         logging.info("processing gauge: %s", gauge.id)
 
-        filedict={}
+        filedict = {}
 
         if not gauge.path:
 
@@ -192,8 +193,7 @@ def main(config, gauges):
                 gauge = matchFlowacc(gauge, flowacc, **config["matching"])
 
             if not gauge:
-                warnings.warn(
-                    "Failed to match the gauge to the flow accumulation grid")
+                warnings.warn("Failed to match the gauge to the flow accumulation grid")
                 continue
 
             logging.debug("generating basin mask")
@@ -204,7 +204,8 @@ def main(config, gauges):
                 logging.debug("writing gauge file")
                 fitem = GridFile(
                     fname=config["gauge"].get("fname", "idgauges.asc"),
-                    outpath=config["gauge"].get("outpath"))
+                    outpath=config["gauge"].get("outpath"),
+                )
                 gaugefile = gaugeGrid(flowacc, gauge).shrink(**mask.bbox)
                 filedict[fitem] = maskData(gaugefile, mask)
 
@@ -221,8 +222,13 @@ def main(config, gauges):
             logging.debug("processing: %s", fdict["fname"])
             fitem = NcFile(**fdict)
             ncdata = NcDimDataset(
-                fitem.fname, "r", fitem.ydim, fitem.xdim,
-                y_shift=fitem.y_shift, x_shift=fitem.x_shift)
+                fitem.fname,
+                "r",
+                fitem.ydim,
+                fitem.xdim,
+                y_shift=fitem.y_shift,
+                x_shift=fitem.x_shift,
+            )
             filedict[NcFile(**fdict)] = maskData(ncdata.shrink(**mask.bbox), mask)
 
         # write mask grid if desired
@@ -230,7 +236,8 @@ def main(config, gauges):
             logging.debug("writing mask file")
             fitem = GridFile(
                 fname=config["mask"].get("fname", "mask.asc"),
-                outpath=config["mask"].get("outpath"))
+                outpath=config["mask"].get("outpath"),
+            )
             filedict[fitem] = mask
 
         logging.debug("finding common extend")
@@ -253,17 +260,26 @@ def initArgparser():
     parser = ArgumentParser(description="mHM basin extractor")
 
     parser.add_argument(
-        "-n", "--line", type=int,
-        help=("the gauge to extract, given as its (0-based) "
-              "line number in the look up table"))
+        "-n",
+        "--line",
+        type=int,
+        help=(
+            "the gauge to extract, given as its (0-based) "
+            "line number in the look up table"
+        ),
+    )
 
     parser.add_argument(
-        "-i", "--input", default="input.yml",
-        help="the input yaml file to read")
+        "-i", "--input", default="input.yml", help="the input yaml file to read"
+    )
 
     parser.add_argument(
-        "-v", "--verbose", default=False, action="store_true",
-        help="give some status output")
+        "-v",
+        "--verbose",
+        default=False,
+        action="store_true",
+        help="give some status output",
+    )
 
     return parser
 

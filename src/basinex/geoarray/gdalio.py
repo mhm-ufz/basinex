@@ -3,81 +3,78 @@
 
 import os
 import warnings
+
 import numpy as np
+
 try:
     from osgeo import gdal, osr
 except ImportError:
     import gdal, osr
+
 from .gdalspatial import _Projection
 from .geotrans import _Geotrans
 
 gdal.UseExceptions()
-gdal.PushErrorHandler('CPLQuietErrorHandler')
+gdal.PushErrorHandler("CPLQuietErrorHandler")
 
 # should be extended, for available options see:
 # http://www.gdal.org/formats_list.html
 _DRIVER_DICT = {
-    ".tif" : "GTiff",
-    ".asc" : "AAIGrid",
-    ".img" : "HFA",
-    ".sdat" : "SAGA",
-    ".png" : "PNG", # not working properly
+    ".tif": "GTiff",
+    ".asc": "AAIGrid",
+    ".img": "HFA",
+    ".sdat": "SAGA",
+    ".png": "PNG",  # not working properly
 }
 
 # type mapping:
 #     - there is no boolean data type in GDAL
 _TYPEMAP = {
-    "uint8"      : 1,
-    "int8"       : 1,
-    "uint16"     : 2,
-    "int16"      : 3,
-    "uint32"     : 4,
-    "int32"      : 5,
+    "uint8": 1,
+    "int8": 1,
+    "uint16": 2,
+    "int16": 3,
+    "uint32": 4,
+    "int32": 5,
     # "int64"      : 5, # there is no int64 data type in GDAL, map to int32 and issue a warning
-    "float32"    : 6,
-    "float64"    : 7,
-    "complex64"  : 10,
-    "complex128" : 11,
-    1            : "int8",
-    2            : "uint16",
-    3            : "int16",
-    4            : "uint32",
-    5            : "int32",
-    6            : "float32",
-    7            : "float64",
-    10           : "complex64",
-    11           : "complex128",
-
+    "float32": 6,
+    "float64": 7,
+    "complex64": 10,
+    "complex128": 11,
+    1: "int8",
+    2: "uint16",
+    3: "int16",
+    4: "uint32",
+    5: "int32",
+    6: "float32",
+    7: "float64",
+    10: "complex64",
+    11: "complex128",
 }
 
 _COLOR_DICT = {
-    1 : "L",
-    2 : "P",
-    3 : "R",
-    4 : "G",
-    5 : "B",
-    6 : "A",
-    7 : "H",
-    8 : "S",
-    9 : "V",
-    10 : "C",
-    11 : "M",
-    12 : "Y",
-    13 : "K",
-    14 : "Y",
-    15 : "Cb",
-    16 : "Cr",
+    1: "L",
+    2: "P",
+    3: "R",
+    4: "G",
+    5: "B",
+    6: "A",
+    7: "H",
+    8: "S",
+    9: "V",
+    10: "C",
+    11: "M",
+    12: "Y",
+    13: "K",
+    14: "Y",
+    15: "Cb",
+    16: "Cr",
 }
 
-_COLOR_MODE_LIST = (
-    "L", "P", "RGB", "RGBA", "CMYK", "HSV", "YCbCr"
-)
+_COLOR_MODE_LIST = ("L", "P", "RGB", "RGBA", "CMYK", "HSV", "YCbCr")
 
-_FILE_MODE_DICT = {
-    "r" : gdal.GA_ReadOnly,
-    "v" : gdal.GA_ReadOnly,
-    "a" : gdal.GA_Update
-}
+_FILE_MODE_DICT = {"r": gdal.GA_ReadOnly, "v": gdal.GA_ReadOnly, "a": gdal.GA_Update}
+
 
 def _fromFile(fname, mode="r"):
     """
@@ -96,9 +93,9 @@ def _fromFile(fname, mode="r"):
     """
 
     if mode not in _FILE_MODE_DICT:
-        raise TypeError("Supported file modes are: {:}".format(
-            ", ".join(_FILE_MODE_DICT.keys())))
-
+        raise TypeError(
+            "Supported file modes are: {:}".format(", ".join(_FILE_MODE_DICT.keys()))
+        )
 
     fobj = gdal.OpenShared(fname, _FILE_MODE_DICT[mode])
     if fobj:
@@ -109,9 +106,9 @@ def _fromFile(fname, mode="r"):
 def _getColorMode(fobj):
     tmp = []
     for i in range(fobj.RasterCount):
-        color = fobj.GetRasterBand(i+1).GetColorInterpretation()
+        color = fobj.GetRasterBand(i + 1).GetColorInterpretation()
         tmp.append(_COLOR_DICT.get(color, "L"))
-    return ''.join(sorted(set(tmp), key=tmp.index))
+    return "".join(sorted(set(tmp), key=tmp.index))
 
 
 def _fromDataset(fobj, mode="r"):
@@ -124,17 +121,21 @@ def _fromDataset(fobj, mode="r"):
             "xorigin": geotrans[0],
             "ycellsize": geotrans[5],
             "xcellsize": geotrans[1],
-            "origin": "ul",            # is that always true?
+            "origin": "ul",  # is that always true?
             "yparam": geotrans[4],
-            "xparam": geotrans[2]}
+            "xparam": geotrans[2],
+        }
 
     fill_values = tuple(
-        fobj.GetRasterBand(i+1).GetNoDataValue() for i in range(fobj.RasterCount))
+        fobj.GetRasterBand(i + 1).GetNoDataValue() for i in range(fobj.RasterCount)
+    )
 
     if len(set(fill_values)) > 1:
         warnings.warn(
-            "More then on fill value found. Only {:} will be used".format(fill_values[0]),
-            RuntimeWarning
+            "More then on fill value found. Only {:} will be used".format(
+                fill_values[0]
+            ),
+            RuntimeWarning,
         )
 
     data = fobj.GetVirtualMemArray() if mode == "v" else fobj.ReadAsArray()
@@ -142,13 +143,14 @@ def _fromDataset(fobj, mode="r"):
     geotrans = _Geotrans(shape=data.shape, **_parseGeotrans(fobj.GetGeoTransform()))
 
     return GeoArray(
-        data       = data,
-        fill_value = fill_values[0],
-        proj       = _Projection(fobj.GetProjection()),
-        mode       = mode,
-        color_mode = _getColorMode(fobj),
-        fobj       = fobj,
-        geotrans   = geotrans)
+        data=data,
+        fill_value=fill_values[0],
+        proj=_Projection(fobj.GetProjection()),
+        mode=mode,
+        color_mode=_getColorMode(fobj),
+        fobj=fobj,
+        geotrans=geotrans,
+    )
 
 
 def _getDataset(grid, mem=False):
@@ -162,7 +164,8 @@ def _getDataset(grid, mem=False):
 
     try:
         out = driver.Create(
-            "", grid.ncols, grid.nrows, grid.nbands, _TYPEMAP[str(grid.dtype)])
+            "", grid.ncols, grid.nrows, grid.nbands, _TYPEMAP[str(grid.dtype)]
+        )
     except KeyError:
         raise RuntimeError("Datatype {:} not supported by GDAL".format(grid.dtype))
 
@@ -173,7 +176,7 @@ def _getDataset(grid, mem=False):
         out.SetProjection(grid.proj.toWkt())
 
     for n in range(grid.nbands):
-        band = out.GetRasterBand(n+1)
+        band = out.GetRasterBand(n + 1)
         if grid.fill_value is not None:
             band.SetNoDataValue(float(grid.fill_value))
         data = grid[n] if grid.ndim > 2 else grid
@@ -215,14 +218,15 @@ def _toFile(geoarray, fname):
 
     def _getDatatype(driver):
         tnames = tuple(driver.GetMetadata_Dict()["DMD_CREATIONDATATYPES"].split(" "))
-        types  = tuple(gdal.GetDataTypeByName(t) for t in tnames)
-        tdict  = tuple((gdal.GetDataTypeSize(t), t) for t in types)
-        otype  = max(tdict, key=lambda x: x[0])[-1]
+        types = tuple(gdal.GetDataTypeByName(t) for t in tnames)
+        tdict = tuple((gdal.GetDataTypeSize(t), t) for t in types)
+        otype = max(tdict, key=lambda x: x[0])[-1]
         return np.dtype(_TYPEMAP[otype])
 
     dataset = _getDataset(geoarray)
-    driver  = _getDriver(_fnameExtension(fname))
+    driver = _getDriver(_fnameExtension(fname))
     driver.CreateCopy(fname, dataset, 0)
+
 
 def _writeData(grid):
 
@@ -231,5 +235,5 @@ def _writeData(grid):
     if data.ndim == 2:
         data = data[None, ...]
 
-    for n in range(fobj.RasterCount) :
+    for n in range(fobj.RasterCount):
         fobj.GetRasterBand(n + 1).WriteArray(data[n])

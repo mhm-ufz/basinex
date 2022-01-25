@@ -1,12 +1,12 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from math import ceil, floor
+
 import numpy as np
-from math import floor, ceil
 
 
 class SpatialMixin(object):
-
     def trim(self):
         """
         Arguments
@@ -26,8 +26,11 @@ class SpatialMixin(object):
         try:
             y_idx, x_idx = np.where(self.data != self.fill_value)[-2:]
             return self.removeCells(
-                top=min(y_idx), bottom=self.nrows - max(y_idx) - 1,
-                left=min(x_idx), right=self.ncols - max(x_idx) - 1)
+                top=min(y_idx),
+                bottom=self.nrows - max(y_idx) - 1,
+                left=min(x_idx),
+                right=self.ncols - max(x_idx) - 1,
+            )
         except ValueError:
             return self
 
@@ -78,7 +81,7 @@ class SpatialMixin(object):
             "ymax": ymax if ymax is not None else self.bbox["ymax"],
             "xmin": xmin if xmin is not None else self.bbox["xmin"],
             "xmax": xmax if xmax is not None else self.bbox["xmax"],
-            }
+        }
 
         cellsize = [float(abs(cs)) for cs in self.cellsize]
         top = floor((self.bbox["ymax"] - bbox["ymax"]) / cellsize[0])
@@ -87,7 +90,8 @@ class SpatialMixin(object):
         right = floor((self.bbox["xmax"] - bbox["xmax"]) / cellsize[1])
 
         return self.removeCells(
-            max(top, 0), max(left, 0), max(bottom, 0), max(right, 0))
+            max(top, 0), max(left, 0), max(bottom, 0), max(right, 0)
+        )
 
     def addCells(self, top=0, left=0, bottom=0, right=0):
         """
@@ -124,22 +128,26 @@ class SpatialMixin(object):
         except TypeError:
             # fill_value is set to none
             raise AttributeError(
-                "Valid fill_value needed, actual value is {:}"
-                .format(self.fill_value))
+                "Valid fill_value needed, actual value is {:}".format(self.fill_value)
+            )
 
-        yorigin = self.yorigin + top*self.ycellsize * -1
-        xorigin = self.xorigin + left*self.xcellsize * -1
+        yorigin = self.yorigin + top * self.ycellsize * -1
+        xorigin = self.xorigin + left * self.xcellsize * -1
 
         out = GeoArray(
             **self._getArgs(
                 data=data,
                 geotrans=self.geotrans._replace(
-                    yorigin=yorigin, xorigin=xorigin, shape=shape),
-                mode="r", fobj=None))
+                    yorigin=yorigin, xorigin=xorigin, shape=shape
+                ),
+                mode="r",
+                fobj=None,
+            )
+        )
 
         # the Ellipsis ensures that the function works
         # for arrays with more than two dimensions
-        out[..., top:top+self.nrows, left:left+self.ncols] = self
+        out[..., top : top + self.nrows, left : left + self.ncols] = self
         return out
 
     def enlarge(self, ymin=None, ymax=None, xmin=None, xmax=None):
@@ -163,7 +171,8 @@ class SpatialMixin(object):
             "ymin": ymin if ymin is not None else self.bbox["ymin"],
             "ymax": ymax if ymax is not None else self.bbox["ymax"],
             "xmin": xmin if xmin is not None else self.bbox["xmin"],
-            "xmax": xmax if xmax is not None else self.bbox["xmax"],}
+            "xmax": xmax if xmax is not None else self.bbox["xmax"],
+        }
 
         cellsize = [float(abs(cs)) for cs in self.cellsize]
 
@@ -172,8 +181,7 @@ class SpatialMixin(object):
         bottom = ceil((self.bbox["ymin"] - bbox["ymin"]) / cellsize[0])
         right = ceil((bbox["xmax"] - self.bbox["xmax"]) / cellsize[1])
 
-        return self.addCells(
-            max(top, 0), max(left, 0), max(bottom, 0), max(right, 0))
+        return self.addCells(max(top, 0), max(left, 0), max(bottom, 0), max(right, 0))
 
     def coordinatesOf(self, y_idx, x_idx):
         """
@@ -197,15 +205,14 @@ class SpatialMixin(object):
             "ur": upper-right corner
         """
 
-        if ((y_idx < 0 or x_idx < 0)
-            or (y_idx >= self.nrows
-                or x_idx >= self.ncols)):
+        if (y_idx < 0 or x_idx < 0) or (y_idx >= self.nrows or x_idx >= self.ncols):
             raise ValueError("Index out of bounds !")
 
         yorigin, xorigin = self.getCorner("ul")
         return (
             yorigin - y_idx * abs(self.cellsize[0]),
-            xorigin + x_idx * abs(self.cellsize[1]))
+            xorigin + x_idx * abs(self.cellsize[1]),
+        )
 
     def indexOf(self, ycoor, xcoor):
         """
@@ -223,7 +230,6 @@ class SpatialMixin(object):
         fall and return its row/column index values.
         """
 
-
         yorigin, xorigin = self.getCorner("ul")
 
         yidx = int(floor((yorigin - ycoor) / float(abs(self.ycellsize))))
@@ -233,7 +239,6 @@ class SpatialMixin(object):
             raise ValueError("Given Coordinates not within the grid domain!")
 
         return yidx, xidx
-
 
     # def snap(self,target):
     #     """

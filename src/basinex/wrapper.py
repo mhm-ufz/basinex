@@ -17,4 +17,3 @@ class GridFile(object):
     def __init__(self, fname, outpath=None):
         self.fname = fname
         self.outpath = outpath
-

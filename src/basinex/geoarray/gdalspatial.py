@@ -2,14 +2,17 @@
 # -*- coding: utf-8 -*-
 
 import warnings
+
 import numpy as np
+
 try:
     from osgeo import gdal, osr
 except ImportError:
-    import gdal, osr
+    import gdal
+    import osr
 
 gdal.UseExceptions()
-gdal.PushErrorHandler('CPLQuietErrorHandler')
+gdal.PushErrorHandler("CPLQuietErrorHandler")
 
 
 class _Projection(object):
@@ -38,9 +41,9 @@ class _Projection(object):
                     method = self._srs.ImportFromDict
                 except AttributeError:
                     method = self._srs.ImportFromProj4
-                    value =  "+{:}".format(
-                        " +".join(
-                            ["=".join(map(str, pp)) for pp in value.items()]))
+                    value = "+{:}".format(
+                        " +".join(["=".join(map(str, pp)) for pp in value.items()])
+                    )
             else:
                 raise RuntimeError("Projection not understood")
 
@@ -61,7 +64,9 @@ class _Projection(object):
         out = dict(
             filter(
                 lambda x: len(x) == 2,
-                [p.replace("+", "").split("=") for p in proj.split(" +")]))
+                [p.replace("+", "").split("=") for p in proj.split(" +")],
+            )
+        )
         return out
 
     def __nonzero__(self):
@@ -92,8 +97,7 @@ class _Transformer(object):
         -------
         Encapsulates the osr Cordinate Transformation functionality
         """
-        self._tx = osr.CoordinateTransformation(
-            sproj._srs, tproj._srs)
+        self._tx = osr.CoordinateTransformation(sproj._srs, tproj._srs)
 
     def __call__(self, y, x):
         try:

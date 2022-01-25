@@ -12,17 +12,18 @@ This module provides a numpy.ma.MaskedArray as a
 wrapper around gdal raster functionality
 
 """
-import os
 import copy
-import numpy as np
+import os
 import warnings
+
+import numpy as np
 from numpy.ma import MaskedArray
-from .utils import _broadcastedMeshgrid, _broadcastTo
-from .gdalspatial import _Projection
+
 from .gdalio import _getDataset, _toFile, _writeData
+from .gdalspatial import _Projection
 from .geotrans import _Geotrans
 from .spatial import SpatialMixin
-
+from .utils import _broadcastedMeshgrid, _broadcastTo
 
 # Possible positions of the grid origin
 ORIGINS = (
@@ -34,20 +35,47 @@ ORIGINS = (
 
 _METHODS = (
     # comparison
-    "__lt__", "__le__", "__gt__", "__ge__", "__eq__", "__ne__", "__nonzero__",
-
+    "__lt__",
+    "__le__",
+    "__gt__",
+    "__ge__",
+    "__eq__",
+    "__ne__",
+    "__nonzero__",
     # unary
-    "__neg__", "__pos__", "__abs__", "__invert__",
-
+    "__neg__",
+    "__pos__",
+    "__abs__",
+    "__invert__",
     # arithmetic
-    "__add__", "__sub__", "__mul__", "__div__", "__truediv__",
-    "__floordiv__", "__mod__", "__divmod__", "__pow__", "__lshift__",
-    "__rshift__", "__and__", "__or__", "__xor__",  # "__matmul__",
-
+    "__add__",
+    "__sub__",
+    "__mul__",
+    "__div__",
+    "__truediv__",
+    "__floordiv__",
+    "__mod__",
+    "__divmod__",
+    "__pow__",
+    "__lshift__",
+    "__rshift__",
+    "__and__",
+    "__or__",
+    "__xor__",  # "__matmul__",
     # arithmetic, in-place
-    "__iadd__", "__isub__", "__imul__", "__idiv__", "__itruediv__",
-    "__ifloordiv__", "__imod__", "__ipow__", "__ilshift__", "__irshift__",
-    "__iand__", "__ior__", "__ixor__",  # "__imatmul__"
+    "__iadd__",
+    "__isub__",
+    "__imul__",
+    "__idiv__",
+    "__itruediv__",
+    "__ifloordiv__",
+    "__imod__",
+    "__ipow__",
+    "__ilshift__",
+    "__irshift__",
+    "__iand__",
+    "__ior__",
+    "__ixor__",  # "__imatmul__"
 )
 
 
@@ -57,10 +85,10 @@ def _checkMatch(func):
             warnings.warn("Incompatible map projections!", RuntimeWarning)
         if len({a.cellsize for a in args if isinstance(a, GeoArray)}) != 1:
             warnings.warn("Incompatible cellsizes", RuntimeWarning)
-        if len({a.getCorner("ul") for a in args
-                if isinstance(a, GeoArray)}) != 1:
+        if len({a.getCorner("ul") for a in args if isinstance(a, GeoArray)}) != 1:
             warnings.warn("Incompatible origins", RuntimeWarning)
         return func(*args)
+
     return inner
 
 
@@ -98,17 +126,29 @@ class GeoArray(SpatialMixin, MaskedArray):
     __metaclass__ = GeoArrayMeta
 
     def __new__(
-            cls, data, geotrans=None,
-            proj=None, fill_value=None, fobj=None, color_mode=None,  # mask=None,
-            yvalues=None, xvalues=None, mode="r", *args, **kwargs):
+        cls,
+        data,
+        geotrans=None,
+        proj=None,
+        fill_value=None,
+        fobj=None,
+        color_mode=None,  # mask=None,
+        yvalues=None,
+        xvalues=None,
+        mode="r",
+        *args,
+        **kwargs,
+    ):
 
         # NOTE: The mask will always be calculated, even if its
         #       already present or not needed at all...
-        mask = (np.zeros_like(data, np.bool)
-                if fill_value is None else data == fill_value)
+        mask = (
+            np.zeros_like(data, np.bool) if fill_value is None else data == fill_value
+        )
 
         self = MaskedArray.__new__(
-            cls, data=data, fill_value=fill_value, mask=mask, *args, **kwargs)
+            cls, data=data, fill_value=fill_value, mask=mask, *args, **kwargs
+        )
         self.unshare_mask()
 
         self.__dict__["geotrans"] = geotrans
@@ -182,8 +222,10 @@ class GeoArray(SpatialMixin, MaskedArray):
         self.mask = self.data == value
         if value != self.fill_value:
             warnings.warn(
-                "Data types not compatible. New fill_value is: {:}"
-                .format(self.fill_value))
+                "Data types not compatible. New fill_value is: {:}".format(
+                    self.fill_value
+                )
+            )
 
     # decorating the methods did not work out...
     fill_value = property(fget=getFillValue, fset=setFillValue)
@@ -206,14 +248,12 @@ class GeoArray(SpatialMixin, MaskedArray):
         instance = self.geotrans if hasattr(self.geotrans, key) else self
         object.__setattr__(instance, key, value)
 
-
     def __getattr__(self, key):
         try:
             # return object.__getattribute__(self.geotrans, key)
             return getattr(self.geotrans, key)
         except AttributeError:
-            raise AttributeError(
-                "'GeoArray' object has no attribute '{:}'".format(key))
+            raise AttributeError("'GeoArray' object has no attribute '{:}'".format(key))
 
     @property
     def fobj(self):
@@ -221,19 +261,26 @@ class GeoArray(SpatialMixin, MaskedArray):
             self._fobj = _getDataset(self, mem=True)
         return self._fobj
 
-    def _getArgs(self, data=None, fill_value=None,
-                 geotrans=None, mode=None, color_mode=None,
-                 proj=None, fobj=None):
+    def _getArgs(
+        self,
+        data=None,
+        fill_value=None,
+        geotrans=None,
+        mode=None,
+        color_mode=None,
+        proj=None,
+        fobj=None,
+    ):
 
         return {
-            "data"       : data if data is not None else self.data,
-            "geotrans"   : geotrans if geotrans is not None else self.geotrans,
-            "proj"       : proj if proj is not None else self.proj,
-            "fill_value" : fill_value if fill_value is not None else self.fill_value,
-            "mode"       : mode if mode is not None else self.mode,
-            "color_mode" : color_mode if color_mode is not None else self.color_mode,
-            "fobj"       : fobj if fobj is not None else self._fobj}
-
+            "data": data if data is not None else self.data,
+            "geotrans": geotrans if geotrans is not None else self.geotrans,
+            "proj": proj if proj is not None else self.proj,
+            "fill_value": fill_value if fill_value is not None else self.fill_value,
+            "mode": mode if mode is not None else self.mode,
+            "color_mode": color_mode if color_mode is not None else self.color_mode,
+            "fobj": fobj if fobj is not None else self._fobj,
+        }
 
     def fill(self, fill_value):
         """
@@ -241,7 +288,8 @@ class GeoArray(SpatialMixin, MaskedArray):
         the fill_value and returns an GeoArray instance
         """
         return GeoArray(
-            self._getArgs(data=self.filled(fill_value), fill_value=fill_value))
+            self._getArgs(data=self.filled(fill_value), fill_value=fill_value)
+        )
 
     def __copy__(self):
         return GeoArray(**self._getArgs())
@@ -292,4 +340,5 @@ class GeoArray(SpatialMixin, MaskedArray):
             cellsize=self.cellsize,
             proj=self.proj,
             fill_value=self.fill_value,
-            mode=self.mode)
+            mode=self.mode,
+        )

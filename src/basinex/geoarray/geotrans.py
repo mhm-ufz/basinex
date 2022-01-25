@@ -1,15 +1,18 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import numpy as np
-from .utils import _broadcastTo
 from abc import ABCMeta, abstractmethod, abstractproperty
+
+import numpy as np
+
+from .utils import _broadcastTo
+
 
 class _GeoBase(object):
     __metaclass__ = ABCMeta
 
-    #@property
-    #def origin(self):
+    # @property
+    # def origin(self):
     #    return "".join(
     #        ["l" if self.ycellsize > 0 else "u",
     #         "l" if self.xcellsize > 0 else "r"])
@@ -73,34 +76,32 @@ class _Geolocation(_GeoBase):
             ymax += ydiff[0].max()
 
         if self.origin[1] == "l":
-            xmax += xdiff[:,-1].max()
+            xmax += xdiff[:, -1].max()
         else:
-            xmin -= xdiff[:,0].max()
+            xmin -= xdiff[:, 0].max()
 
         return {"ymin": ymin, "ymax": ymax, "xmin": xmin, "xmax": xmax}
-
 
     def _replace(self, yvalues=None, xvalues=None, origin=None, shape=None):
         return _Geolocation(
             yvalues=self.yvalues if yvalues is None else yvalues,
             xvalues=self.xvalues if xvalues is None else xvalues,
             shape=self.shape if shape is None else shape,
-            origin=self.origin if origin is None else origin)
+            origin=self.origin if origin is None else origin,
+        )
 
     def _todict(self):
-        return {
-            "yvalues": self.yvalues,
-            "xvalues": self.xvalues}
+        return {"yvalues": self.yvalues, "xvalues": self.xvalues}
 
     def _getitem(self, slc):
 
         yvalues = np.array(
-            _broadcastTo(self.yvalues, self.shape, (-2, -1))[slc],
-            copy=False, ndmin=2)
+            _broadcastTo(self.yvalues, self.shape, (-2, -1))[slc], copy=False, ndmin=2
+        )
 
         xvalues = np.array(
-            _broadcastTo(self.xvalues, self.shape, (-2, -1))[slc],
-            copy=False, ndmin=2)
+            _broadcastTo(self.xvalues, self.shape, (-2, -1))[slc], copy=False, ndmin=2
+        )
 
         if yvalues.ndim > 2:
             yvalues = yvalues[..., 0, :, :]
@@ -117,12 +118,14 @@ class _Geolocation(_GeoBase):
             "PIXEL_OFFSET": 0,
             "LINE_OFFSET": 0,
             "PIXEL_STEP": 1,
-            "LINE_STEP": 1}
+            "LINE_STEP": 1,
+        }
 
 
 class _Geotrans(_GeoBase):
-    def __init__(self, yorigin, xorigin, ycellsize, xcellsize,
-                 yparam, xparam, origin, shape):
+    def __init__(
+        self, yorigin, xorigin, ycellsize, xcellsize, yparam, xparam, origin, shape
+    ):
         self.yorigin = yorigin
         self.xorigin = xorigin
         self.ycellsize = ycellsize
@@ -161,28 +164,29 @@ class _Geotrans(_GeoBase):
 
         return {"ymin": ymin, "ymax": ymax, "xmin": xmin, "xmax": xmax}
 
-
     def _calcCoordinate(self, row, col):
 
-        yval = (self.yorigin
-                + col * self.yparam
-                + row * self.ycellsize)
-        xval = (self.xorigin
-                + col * self.xcellsize
-                + row * self.xparam)
+        yval = self.yorigin + col * self.yparam + row * self.ycellsize
+        xval = self.xorigin + col * self.xcellsize + row * self.xparam
         return yval, xval
 
     def toGdal(self):
-        out = (self.xorigin, self.xcellsize, self.xparam,
-                self.yorigin, self.yparam, self.ycellsize)
+        out = (
+            self.xorigin,
+            self.xcellsize,
+            self.xparam,
+            self.yorigin,
+            self.yparam,
+            self.ycellsize,
+        )
         return out
 
     @property
     def coordinates(self):
         if self._yvalues is None or self._xvalues is None:
             xdata, ydata = np.meshgrid(
-                np.arange(self.ncols, dtype=float),
-                np.arange(self.nrows, dtype=float))
+                np.arange(self.ncols, dtype=float), np.arange(self.nrows, dtype=float)
+            )
             self._yvalues, self._xvalues = self._calcCoordinate(ydata, xdata)
         return self._yvalues, self._xvalues
 
@@ -195,8 +199,7 @@ class _Geotrans(_GeoBase):
         return self.coordinates[1]
 
     def getCorners(self):
-        corners = [(0, 0), (self.nrows, 0),
-                   (0, self.ncols), (self.nrows, self.ncols)]
+        corners = [(0, 0), (self.nrows, 0), (0, self.ncols), (self.nrows, self.ncols)]
         return [self._calcCoordinate(*idx) for idx in corners]
 
     def getCorner(self, corner=None):
@@ -206,10 +209,20 @@ class _Geotrans(_GeoBase):
         bbox = self.bbox
         return (
             bbox["ymax"] if corner[0] == "u" else bbox["ymin"],
-            bbox["xmax"] if corner[1] == "r" else bbox["xmin"],)
+            bbox["xmax"] if corner[1] == "r" else bbox["xmin"],
+        )
 
-    def _replace(self, yorigin=None, xorigin=None, ycellsize=None, xcellsize=None,
-                 yparam=None, xparam=None, origin=None, shape=None):
+    def _replace(
+        self,
+        yorigin=None,
+        xorigin=None,
+        ycellsize=None,
+        xcellsize=None,
+        yparam=None,
+        xparam=None,
+        origin=None,
+        shape=None,
+    ):
 
         return _Geotrans(
             yorigin=self.yorigin if yorigin is None else yorigin,
@@ -219,7 +232,8 @@ class _Geotrans(_GeoBase):
             yparam=self.yparam if yparam is None else yparam,
             xparam=self.xparam if xparam is None else xparam,
             origin=self.origin if origin is None else origin,
-            shape=self.shape if shape is None else shape)
+            shape=self.shape if shape is None else shape,
+        )
 
     def _todict(self):
         return {
@@ -229,24 +243,28 @@ class _Geotrans(_GeoBase):
             "xcellsize": self.xcellsize,
             "yparam": self.yparam,
             "xparam": self.xparam,
-            "origin": self.origin}
+            "origin": self.origin,
+        }
 
     def _getitem(self, slc):
 
         yvalues = np.array(
-            _broadcastTo(self.yvalues, self.shape, (-2, -1))[slc],
-            copy=False, ndmin=2)
+            _broadcastTo(self.yvalues, self.shape, (-2, -1))[slc], copy=False, ndmin=2
+        )
 
         xvalues = np.array(
-            _broadcastTo(self.xvalues, self.shape, (-2, -1))[slc],
-            copy=False, ndmin=2)
+            _broadcastTo(self.xvalues, self.shape, (-2, -1))[slc], copy=False, ndmin=2
+        )
 
         nrows, ncols = yvalues.shape[-2:]
         ycellsize = np.diff(yvalues, axis=-2).mean() if nrows > 1 else self.ycellsize
         xcellsize = np.diff(xvalues, axis=-1).mean() if ncols > 1 else self.xcellsize
 
         out = self._replace(
-            yorigin=yvalues.max(), xorigin=xvalues.min(),
-            ycellsize=ycellsize, xcellsize=xcellsize,
-            shape=yvalues.shape)
+            yorigin=yvalues.max(),
+            xorigin=xvalues.min(),
+            ycellsize=ycellsize,
+            xcellsize=xcellsize,
+            shape=yvalues.shape,
+        )
         return out

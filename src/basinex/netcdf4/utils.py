@@ -12,12 +12,12 @@ def concatDimension(fnames, dim, dimvar=None, outfname=None, **kwargs):
     datasets (List[str]):          datasets to concatenate
     dim (String):                  name of the dimension to concatenate
     dimvar (Optional[String]):     name of the variable defining values
-                                   for the concatenation dimension, 
+                                   for the concatenation dimension,
                                    default: dimvar = dim
     outfname (Optional[str]):      file name of an output dataset
     kwargs (Optional[Any]):        paramaters to pass to the createVariable
                                    Method of NcDataset
-                                
+
 
     Return
     ------
@@ -44,7 +44,7 @@ def concatDimension(fnames, dim, dimvar=None, outfname=None, **kwargs):
                 types.append(data.dtype)
                 vals.extend(data.tolist())
         return np.unique(vals).astype(dtype=np.find_common_type(types, []))
-    
+
     def getCommonVarTypes(fnames):
         vars = {}
         for fname in fnames:
@@ -55,9 +55,9 @@ def concatDimension(fnames, dim, dimvar=None, outfname=None, **kwargs):
                     except KeyError:
                         vars[vname] = [var.dtype]
         return {
-            vname: np.find_common_type(vtypes, [])
-            for vname, vtypes in vars.items()}
-            
+            vname: np.find_common_type(vtypes, []) for vname, vtypes in vars.items()
+        }
+
     if not dimvar:
         dimvar = dim
 
@@ -73,20 +73,25 @@ def concatDimension(fnames, dim, dimvar=None, outfname=None, **kwargs):
     for i, fname in enumerate(fnames):
 
         with NcDataset(fname, "r") as nc:
-        
+
             out.copyDimensions(nc.dimensions, skip=out.dimensions, fix=True)
             out.copyAttributes(nc.attributes)
 
             for vname, var in nc.variables.items():
 
                 outvar = out.copyVariable(
-                    var, dtype=dtypes[vname], data=False, fail=False, **kwargs)
+                    var, dtype=dtypes[vname], data=False, fail=False, **kwargs
+                )
 
                 # build up the indices
                 if dim in var.dimensions:
                     # idx = [dimvals.index(v) for v in nc.variables[dimvar]]
                     idx = [np.where(dimvals == v)[0][0] for v in nc.variables[dimvar]]
-                    slices = [slice(None,)] * len(var.dimensions)
+                    slices = [
+                        slice(
+                            None,
+                        )
+                    ] * len(var.dimensions)
                     slices[var.dimensions.index(dim)] = idx
                 else:
                     # writing them again is stupid...
