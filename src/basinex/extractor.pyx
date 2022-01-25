@@ -1,3 +1,7 @@
+#cython: language_level=3
+# distutils: language = c++
+# -*- coding: utf-8 -*-
+
 cimport cython
 
 import numpy as np
