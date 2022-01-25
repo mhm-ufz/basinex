@@ -22,7 +22,6 @@ from .gdalspatial import _Projection
 from .gdalio import _getDataset, _toFile, _writeData
 from .geotrans import _Geotrans
 from .spatial import SpatialMixin
-from .wrapper import array
 
 
 # Possible positions of the grid origin
@@ -281,6 +280,8 @@ class GeoArray(SpatialMixin, MaskedArray):
         _toFile(self, fname)
 
     def setMask(self, mask):
+        from .wrapper import array
+
         data = np.array(self, copy=True, subok=False)
         data[..., mask] = self.fill_value
         return array(
