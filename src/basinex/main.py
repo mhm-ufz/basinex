@@ -42,7 +42,7 @@ def cli():
 def readConfig(fname):
     with open(fname, "r") as f:
         try:
-            out = yaml.load(f)
+            out = yaml.safe_load(f)
         except IOError:
             raise
         except Exception:
