@@ -47,13 +47,13 @@ complete GNU license text can also be found at
 Contact
 ==============
 
-Dr. Luis Samaniego
-Dr. Rohini Kumar
+Dr. Stephan Thober
+Sebastian Müller
 Department Computational Hydrosystems
 
 Mail: Permoserstrasse 15, 04318 Leipzig, Germany
-E-mail: luis.samaniego@ufz.de
-E-mail: rohini.kumar@ufz.de
+E-mail: stephan.thober@ufz.de
+E-mail: sebastian.mueller@ufz.de
 
 
 ==============
@@ -78,24 +78,6 @@ are met:
 *  Redistributions of source code are allowed for research purposes
    ONLY. For commercial applications you need to consult the
    authorities of the UFZ.
-
-
-==============
-Modification
-==============
-
-If software is modified to produce derivative works, such modified
-software should be clearly marked, so as not to confuse it with the
-version available from UFZ. The following sources are to be
-acknowledged:
-
-*   Samaniego L., R. Kumar, S. Attinger (2010): Multiscale parameter
-    regionalization of a grid-based hydrologic model at the mesoscale.
-    Water Resour. Res., 46,W05523, doi:10.1029/2008WR007327.
-*   Kumar, R., L. Samaniego, and S. Attinger(2013): Implications of
-    distributed hydrologic model parameterization on water fluxes at
-    multiple scales and locations, Water Resour. Res., 49,
-    doi:10.1029/2012WR012195.
 
 
 ==============
