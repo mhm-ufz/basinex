@@ -38,11 +38,11 @@ environment = "PIP_PREFER_BINARY=1"
 # Install system library
 [tool.cibuildwheel.linux]
 before-all = [
-  "apt-get install -y software-properties-common",
+  "apt install -y software-properties-common",
   "add-apt-repository -y ppa:ubuntugis/ppa",
-  "apt-get update",
-  "apt-get install -y gdal-bin",
-  "apt-get install -y libgdal-dev",
+  "apt update",
+  "apt install -y gdal-bin",
+  "apt install -y libgdal-dev",
   "export CPLUS_INCLUDE_PATH=/usr/include/gdal",
   "export C_INCLUDE_PATH=/usr/include/gdal",
   # "pip install GDAL",
