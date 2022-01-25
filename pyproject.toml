@@ -28,18 +28,7 @@ target-version = [
 [tool.cibuildwheel]
 # Switch to using build
 build-frontend = "build"
-# Disable building PyPy wheels on all platforms, 32bit for py3.10 and musllinux builds
-skip = "pp* *-win32 *-musllinux_*"
-# Run the package tests with cli
-test-command = "basinex -h"
-# no wheels for linux-32bit anymore for numpy>=1.22
+# Disable building PyPy wheels on all platforms and musllinux builds
+skip = "pp* *-musllinux_*"
+# prefer binaries
 environment = "PIP_PREFER_BINARY=1"
-
-# Install system library
-[tool.cibuildwheel.linux]
-before-all = [
-    "yum install gdal34-devel",
-    "export CPLUS_INCLUDE_PATH=/usr/include/gdal",
-    "export C_INCLUDE_PATH=/usr/include/gdal",
-    "pip3 install GDAL==3.4",
-]
