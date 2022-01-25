@@ -9,14 +9,34 @@ from argparse import ArgumentParser
 import yaml
 import numpy as np
 
-from ufz.netcdf4 import NcDataset
-from lib import geoarray as ga
-from lib.netcdf import NcDimDataset
-from lib.gauges import readGauges, matchFlowacc
-from lib.wrapper import NcFile, GridFile
+from .netcdf4 import NcDataset
+from . import geoarray as ga
+from .netcdf import NcDimDataset
+from .gauges import readGauges, matchFlowacc
+from .wrapper import NcFile, GridFile
 
-from extractor import extract
+from .extractor import extract
 
+
+def cli():
+    parser = initArgparser()
+    args = parser.parse_args()
+
+    logging.basicConfig(
+        format="%(message)s",
+        level=logging.DEBUG if args.verbose else logging.INFO)
+
+    config = readConfig(args.input)
+
+    # command line option -n
+    line = args.line
+    gauges = readGauges(config["gauges"])
+    if line:
+        if line > len(gauges)-1:
+            raise ValueError("Given line number exceeds table row count")
+        gauges = gauges[line:line+1]
+
+    main(config, gauges)
 
 
 def readConfig(fname):
@@ -249,22 +269,4 @@ def initArgparser():
 
 
 if __name__ == "__main__":
-
-    parser = initArgparser()
-    args = parser.parse_args()
-
-    logging.basicConfig(
-        format="%(message)s",
-        level=logging.DEBUG if args.verbose else logging.INFO)
-
-    config = readConfig(args.input)
-
-    # command line option -n
-    line = args.line
-    gauges = readGauges(config["gauges"])
-    if line:
-        if line > len(gauges)-1:
-            raise ValueError("Given line number exceeds table row count")
-        gauges = gauges[line:line+1]
-
-    main(config, gauges)
+    cli()
