@@ -1,9 +1,12 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import gdal, osr
-import numpy as np
 from math import ceil
+import numpy as np
+try:
+    from osgeo import gdal, osr
+except ImportError:
+    import gdal, osr
 from .wrapper import array, full
 from .gdalio import _getDataset, _fromDataset
 from .gdalspatial import _Projection, _Transformer

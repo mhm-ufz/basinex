@@ -3,7 +3,7 @@
 
 import os
 import numpy as np
-from ufz.netcdf4 import NcDataset
+from .netcdf4 import NcDataset
 
 
 class NcDimDataset(NcDataset):

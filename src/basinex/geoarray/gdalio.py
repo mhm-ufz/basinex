@@ -4,7 +4,10 @@
 import os
 import warnings
 import numpy as np
-import gdal, osr
+try:
+    from osgeo import gdal, osr
+except ImportError:
+    import gdal, osr
 from .gdalspatial import _Projection
 from .geotrans import _Geotrans
 

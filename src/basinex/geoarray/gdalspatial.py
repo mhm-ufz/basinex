@@ -3,7 +3,10 @@
 
 import warnings
 import numpy as np
-import gdal, osr
+try:
+    from osgeo import gdal, osr
+except ImportError:
+    import gdal, osr
 
 gdal.UseExceptions()
 gdal.PushErrorHandler('CPLQuietErrorHandler')
