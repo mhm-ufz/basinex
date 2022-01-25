@@ -97,7 +97,6 @@ jobs:
           python -m build --sdist --outdir dist .
 
       - uses: actions/upload-artifact@v2
-        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.9'
         with:
           path: dist/*.tar.gz
 
