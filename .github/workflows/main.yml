@@ -48,12 +48,12 @@ jobs:
       matrix:
         cfg:
         - { os: ubuntu-latest, arch: x86_64 }
-        # - { os: ubuntu-latest, arch: i686 }
-        # - { os: windows-latest, arch: AMD64 }
-        # - { os: windows-latest, arch: x86 }
-        # - { os: macos-latest, arch: x86_64 }
-        # - { os: macos-latest, arch: arm64 }
-        # - { os: macos-latest, arch: universal2 }
+        - { os: ubuntu-latest, arch: i686 }
+        - { os: windows-latest, arch: AMD64 }
+        - { os: windows-latest, arch: x86 }
+        - { os: macos-latest, arch: x86_64 }
+        - { os: macos-latest, arch: arm64 }
+        - { os: macos-latest, arch: universal2 }
 
     steps:
       - uses: actions/checkout@v2
@@ -71,6 +71,42 @@ jobs:
         with:
           path: ./dist/*.whl
 
+  test_wheel:
+    name: Test wheel on ${{ matrix.os }} with py ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest] #, windows-latest, macos-latest
+        python-version: ['3.6', '3.7', '3.8', '3.9', '3.10']
+
+    steps:
+      - uses: actions/download-artifact@v2
+        with:
+          name: artifact
+          path: dist
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install
+        run: |
+          sudo add-apt-repository ppa:ubuntugis/ppa && sudo apt-get update
+          sudo apt-get update
+          sudo apt-get install gdal-bin
+          sudo apt-get install libgdal-dev
+          export CPLUS_INCLUDE_PATH=/usr/include/gdal
+          export C_INCLUDE_PATH=/usr/include/gdal
+          python -m pip install --upgrade pip
+          pip install GDAL==$(gdal-config --version | awk -F'[.]' '{print $1"."$2}')
+          pip install --find-links dist/ basinex
+
+      - name: Run tests
+        run: |
+          basinex -h
+
   build_sdist:
     name: sdist
     runs-on: ubuntu-latest
@@ -84,16 +120,10 @@ jobs:
         with:
           python-version: 3.9
 
-      - name: Install dependencies
-        env:
-          GSTOOLS_BUILD_PARALLEL: 1
+      - name: Build sdist
         run: |
           python -m pip install --upgrade pip
           pip install build
-
-      - name: Build sdist
-        run: |
-          # PEP 517 package builder from pypa
           python -m build --sdist --outdir dist .
 
       - uses: actions/upload-artifact@v2
