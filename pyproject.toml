@@ -38,6 +38,7 @@ environment = "PIP_PREFER_BINARY=1"
 # Install system library
 [tool.cibuildwheel.linux]
 before-all = [
+  "apt-get install -y software-properties-common",
   "add-apt-repository -y ppa:ubuntugis/ppa",
   "apt-get update",
   "apt-get install -y gdal-bin",
