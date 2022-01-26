@@ -115,10 +115,11 @@ jobs:
       - name: Install Linux dependencies
         if: matrix.os == 'ubuntu-latest'
         run: |
+          sudo add-apt-repository ppa:ubuntugis/ppa
           sudo apt-get update
           sudo apt install gdal-bin libgdal-dev
           python -m pip install --upgrade pip
-          pip install wheel setuptools==58.0 numpy
+          pip install wheel numpy
           pip install GDAL==$(gdal-config --version)
 
       - name: Install Windows dependencies
