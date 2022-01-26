@@ -118,7 +118,7 @@ jobs:
           sudo apt-get update
           sudo apt install gdal-bin libgdal-dev
           python -m pip install --upgrade pip
-          pip install wheel
+          pip install wheel setuptools==58.0 numpy
           pip install GDAL==$(gdal-config --version)
 
       - name: Install Windows dependencies
