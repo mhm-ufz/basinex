@@ -23,8 +23,8 @@ The basin extractor. Extract basins for given gauging stations.
 It is best to use basinex with conda to have gdal and NetCDF installed properly.
 To use the development version of basinex, download this repository and do the following in your conda environment:
 
-   conda install -y gdal netcdf4 pyyaml cxx-compiler
-   pip install .
+    conda install -y gdal netcdf4 pyyaml cxx-compiler
+    pip install .
 
 Then you can execute `basinex` in that conda environment.
 
