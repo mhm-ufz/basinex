@@ -1,9 +1,15 @@
 # -*- coding: utf-8 -*-
 """Basin Extractor."""
 import os
-from setuptools import setup, Extension
-from Cython.Build import cythonize
+import site
+import sys
+
 import numpy as np
+from Cython.Build import cythonize
+from setuptools import Extension, setup
+
+# pip issue: https://github.com/pypa/pip/issues/7953
+site.ENABLE_USER_SITE = "--user" in sys.argv[1:]
 
 # cython extensions ###########################################################
 
