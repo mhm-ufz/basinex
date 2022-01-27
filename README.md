@@ -62,6 +62,34 @@ Then you can execute `basinex` in that conda environment.
 
 ## Documentation
 
+Here is a short introduction about how to use the basin extractor.
+Have a look at the example directory or try it out directly with:
+```bash
+basinex -c examples
+```
+
+### Usage
+A command line script `basinex` will be installed with this package.
+You can execute it in your terminal and it will search for an `input.yml` file in your current directory.
+
+To get more information about how to use the command line interface, you can have a look at the help message:
+```bash
+$ basinex -h
+usage: basinex [-h] [-n LINE] [-i INPUT] [-v] [-c CWD] [--version]
+
+mHM basin extractor
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -n LINE, --line LINE  the gauge to extract, given as its (0-based) line number in the look up table
+  -i INPUT, --input INPUT
+                        the input yaml file to read (default: 'input.yml')
+  -v, --verbose         give some status output
+  -c CWD, --cwd CWD     the working directory
+  --version             show program's version number and exit
+```
+
+### The input file
 The main input file `input.yml` is documented and should (hopefully) give an overview
 
 The default input file looks like this:
