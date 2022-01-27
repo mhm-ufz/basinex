@@ -25,6 +25,9 @@ flowdir: /path/to/fdir.asc
 #                  mask is stored in a netcdf file)
 gauges: /path/to/lut.txt
 
+# Optional: perform a latitude correction for the given basin size (default: False)
+#     - AREA = N_cells * res_x * ( cos(LAT) * res_y ) * scaling factor^2
+latitude-size-correction: False
 
 # Required: gauge matching parameters
 # Note:
@@ -132,6 +135,5 @@ ncfiles:
 
     - fname: /path/to/input/input2.nc
       outpath: meteo
-      ydim: y
-      xdim: x
-
+      ydim: 'y'
+      xdim: 'x'

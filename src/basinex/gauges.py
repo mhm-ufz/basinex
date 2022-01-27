@@ -6,11 +6,13 @@ import numpy as np
 
 
 class Gauge(object):
-    def __init__(self, id, y=None, x=None, size=None, path=None, varname=None):
+    def __init__(
+        self, id, y=None, x=None, size=None, path=None, varname=None, lat_fix=False
+    ):
         self.id = id
         self.y = y
         self.x = x
-        self.size = size
+        self.size = size / np.cos(np.deg2rad(y)) if lat_fix else size
         self.path = path
         self.varname = varname
 
@@ -27,7 +29,7 @@ class Gauge(object):
         )
 
 
-def readGauges(fname):
+def readGauges(fname, lat_fix=False):
     keysets = {
         tuple(sorted(["id", "size", "y", "x"])),
         tuple(sorted(["id", "path", "varname"])),
@@ -42,7 +44,7 @@ def readGauges(fname):
                         list(keysets)
                     )
                 )
-            out.append(Gauge(**gauge))
+            out.append(Gauge(lat_fix=lat_fix, **gauge))
     return out
 
 

@@ -28,7 +28,9 @@ def cli():
 
     # command line option -n
     line = args.line
-    gauges = readGauges(config["gauges"])
+    gauges = readGauges(
+        config["gauges"], lat_fix=config.get("latitude-size-correction", False)
+    )
     if line:
         if line > len(gauges) - 1:
             raise ValueError("Given line number exceeds table row count")
