@@ -12,7 +12,7 @@ class Gauge(object):
         self.id = id
         self.y = y
         self.x = x
-        self.size = size / np.cos(np.deg2rad(y)) if lat_fix else size
+        self.size = float(size) / np.cos(np.deg2rad(float(y))) if lat_fix else size
         self.path = path
         self.varname = varname
 
