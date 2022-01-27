@@ -13,13 +13,44 @@ The basin extractor. Extract basins for given gauging stations.
 - netCDF4
 - GDAL
 - pyyaml
-- C++ compiler
+- C++ compiler (for development version)
 
 
 ## Installation
+If you have GDAL already installed, basinex can be installed via pip:
 
     pip install basinex
 
+### GDAL installation
+Getting GDAL installed with pip is allways a bit cumbersome. Therefore we compiled instructions for the main target systems.
+
+#### Ubuntu
+To get a recent version of GDAL, you can use the ppa of [ubuntugis](https://launchpad.net/~ubuntugis/+archive/ubuntu/ppa):
+```bash
+sudo add-apt-repository ppa:ubuntugis/ppa
+sudo apt-get update
+sudo apt install gdal-bin libgdal-dev
+pip install wheel numpy
+pip install GDAL==$(gdal-config --version)
+```
+
+#### MacOS
+GDAL can be installed with [homebrew](https://formulae.brew.sh/formula/gdal):
+```bash
+brew install gdal
+pip install wheel numpy
+pip install GDAL==$(gdal-config --version)
+```
+
+#### Windows
+You can use the unoffical wheels of [Christoph Gohlke](https://www.lfd.uci.edu/~gohlke/pythonlibs/) to install GDAL.
+The easiest way to do so, is using [pipwin](https://github.com/lepisma/pipwin):
+```bash
+pip install pipwin
+pipwin install gdal
+```
+
+### Development version in conda environment
 It is best to use basinex with conda to have gdal and NetCDF installed properly.
 To use the development version of basinex, download this repository and do the following in your conda environment:
 
@@ -27,6 +58,7 @@ To use the development version of basinex, download this repository and do the f
     pip install .
 
 Then you can execute `basinex` in that conda environment.
+
 
 ## Documentation
 
@@ -65,8 +97,7 @@ ncfiles:
   - fname: /path/to/input/input2.nc
     outpath: meteo
     ydim: 'y'
-    xdim: x
-
+    xdim: 'x'
 ```
 
 ### Description
@@ -78,16 +109,19 @@ ncfiles:
   Structure of the table:
   - A simple text table with seperator ';'
   - if the basin should be delineated, the following fields are required:
-    - 'id':   an unique gauging station identifier
-    - 'size': size of the catchment
-    - 'y':    y coordinate of the gauging station
-    - 'x':    x coordinate of the gauging station
+    - `id`:   an unique gauging station identifier
+    - `size`: size of the catchment
+    - `y`:    y coordinate of the gauging station
+    - `x`:    x coordinate of the gauging station
   - if an pre processed basin mask should be used, the following fields are required:
-    - 'id':      an unique basin identifier
-    - 'path':    path to the mask file
-    - 'varname': name of the mask variable (optional, only needed if the mask is stored in a netcdf file)
-- `matching:` **Required**: gauge matching parameters
-  - Note:
+    - `id`:      an unique basin identifier
+    - `path`:    path to the mask file
+    - `varname`: name of the mask variable (optional, only needed if the mask is stored in a netcdf file)
+- `latitude-size-correction: False` - **Optional**:
+  perform a latitude correction for the given basin size (default: False)
+  - `AREA = N_cells * res_x * ( cos(LAT) * res_y ) * scaling factor^2`
+- `matching:` - **Required**: gauge matching parameters
+  - **Note**:
     The gauge matching is based on the flowaccumulation data. The value for
     any given cell in the flowaccumulation grid is interpreted as the size
     [in cells] of a river basin drainig into the respective cell.
@@ -97,30 +131,29 @@ ncfiles:
     maximum size. As soon as a matching cell is found (error between catchment
     sizes is smaller than the given maximum error) the search ends.
   - `scaling_factor: .001` - scaling factor to account for the (possible) unit differences between the flowaccumulation and the gauging data. In order to make the data comparable the effective flowaccumulation will be caclulated as:
-        flowaccumulation_value * (cellsize * scaling_factor)^2
+    - `flowaccumulation_value * (cellsize * scaling_factor)^2`
   - `max_distance: 800` - maximum distance [in map units] around a given gauging station location to search for a matching cell
   - `max_error: 0.8` - maximum error, as a fraction of the given basin size
 - `mask:` - **Optional**: Write the delineated basin
-  - `fname: basin.asc` - **Optional**: file name of the mask grid (default: 'mask.asc')
+  - `fname: basin.asc` - **Optional**: file name of the mask grid (default: `mask.asc`)
   - `outpath: morph` - output subdirectory
 - `gauge:` - **Optional**: Write the gauge basin
-  - `fname: idgauges.asc` - **Optional**: file name of the gauge grid (default: 'idgauges.asc')
+  - `fname: idgauges.asc` - **Optional**: file name of the gauge grid (default: `idgauges.asc`)
   - `outpath: morph` - output subdirectory
 - `gridfiles:` - **Optional**: Any number of grid files to extract.
-  - Note:
+  - **Note**:
     currently only the formats ArcAscii and GeoTIFF are supported
   - `fname: /path/to/input/facc.asc` - flow accumulation and flow direction won't be written unless listed here
   - `outpath: morph` - **Optional**: output subdirectory under outpath/gauge_id
-
 - `ncfiles:` - **Optional**: Any number of netcdf files to extract.
-  - Note:
+  - **Note**:
     In order to extract from netcdf, coordinate values must be given.
-    - Example:
-      If your data variables depend on the three dimensions 'time', 'y', 'x'
+    - **Example**:
+      If your data variables depend on the three dimensions `time`, `y`, `x`
       your file should also contain the two one-dimensional (!) variables
-      'y' (depending solely on the dimension 'y') and 'x' (depending solely
-      on the dimension 'x').
-    Tools like 'cdo' tend to silently remove variables, so double check, that this information is avaialable
+      `y` (depending solely on the dimension `y`) and `x` (depending solely
+      on the dimension `x`).
+    Tools like `cdo` tend to silently remove variables, so double check, that this information is avaialable
   - `fname: /path/to/input/input1.nc`
   - `outpath: meteo` - **Optional**: output subdirectory under outpath/gauge_id
   - `ydim: northing` - **Required**: name of the (1D-) variable holding the y coordinates
@@ -135,26 +168,26 @@ ncfiles:
     the upper left corner in x and y direction.
     The bounding box of the dataset (an imaginary box, that contains
     exactly the entire spatial domain) is then caclulated as:
-        ymin = min(y_values) - (cellsize * (1 - y_shift))
-        ymax = max(y_values) + (cellsize * y_shift)
-        xmin = min(x_values) - (cellsize * (1 - x_shift))
-        xmax = max(x_values) + (cellsize * x_shift)
-    - Examples:
+    - `ymin = min(y_values) - (cellsize * (1 - y_shift))`
+    - `ymax = max(y_values) + (cellsize * y_shift)`
+    - `xmin = min(x_values) - (cellsize * (1 - x_shift))`
+    - `xmax = max(x_values) + (cellsize * x_shift)`
+    - **Examples**:
         - Your coordinate values specify the upper left corner of a cell
-          `y_shift: 0`
-          `x_shift: 0`
+          - `y_shift: 0`
+          - `x_shift: 0`
         - Your coordinate values specify the center of a cell:
-          `y_shift: 0.5`
-          `x_shift: 0.5`
+          - `y_shift: 0.5`
+          - `x_shift: 0.5`
         - Your coordinate values specify the lower left corner of a cell
-          `y_shift: 1`
-          `x_shift: 0`
+          - `y_shift: 1`
+          - `x_shift: 0`
     - Default: lower left corner, i.e:
-      `y_shift: 1`
-      `x_shift: 0`
+      - `y_shift: 1`
+      - `x_shift: 0`
 
 ## Notes
 
 This package was orginally developed by David Schäfer.
 
-The `netcdf4` and `geoarray` subpackages have been taken from the [jams-python](https://github.com/mcuntz/jams_python) package, taht was formerly developed at the CHS department at the UFZ and is now released under the MIT license.
+The `netcdf4` and `geoarray` subpackages have been taken from the [jams-python](https://github.com/mcuntz/jams_python) package, that was formerly developed at the CHS department at the UFZ and is now released under the MIT license.

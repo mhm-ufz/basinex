@@ -9,6 +9,7 @@ All notable changes to **basinex** will be documented in this file.
 - new package structure
 - installable
 - added entry point for script usage
+- added `latitude-size-correction` switch to yaml file for basin area correction with latlon coordinates
 
 ### Changes
 - added ufz dependecies to src
