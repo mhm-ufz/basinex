@@ -4,10 +4,12 @@ import logging
 import os
 import warnings
 from argparse import ArgumentParser
+from pathlib import Path
 
 import numpy as np
 import yaml
 
+from . import __version__
 from . import geoarray as ga
 from .extractor import extract
 from .gauges import matchFlowacc, readGauges
@@ -23,6 +25,9 @@ def cli():
     logging.basicConfig(
         format="%(message)s", level=logging.DEBUG if args.verbose else logging.INFO
     )
+
+    os.chdir(Path(args.cwd))
+    logging.debug(f"in directory: {os.getcwd()}")
 
     config = readConfig(args.input)
 
@@ -281,6 +286,10 @@ def initArgparser():
         action="store_true",
         help="give some status output",
     )
+
+    parser.add_argument("-c", "--cwd", default=".", help="the working directory")
+
+    parser.add_argument("--version", action="version", version=__version__)
 
     return parser
 
