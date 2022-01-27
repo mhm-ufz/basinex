@@ -276,7 +276,10 @@ def initArgparser():
     )
 
     parser.add_argument(
-        "-i", "--input", default="input.yml", help="the input yaml file to read"
+        "-i",
+        "--input",
+        default="input.yml",
+        help="the input yaml file to read (default: 'input.yml')",
     )
 
     parser.add_argument(
