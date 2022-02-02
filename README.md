@@ -216,6 +216,10 @@ ncfiles:
 
 ## Notes
 
-This package was orginally developed by David Schäfer.
+This package was orginally developed by [David Schäfer](https://github.com/schaefed) who also provides a standalone version of the [geoarray](https://github.com/schaefed/geoarray) subpackage.
 
 The `netcdf4` and `geoarray` subpackages have been taken from the [jams-python](https://github.com/mcuntz/jams_python) package, that was formerly developed at the CHS department at the UFZ and is now released under the MIT license.
+
+## License
+
+LGPLv3
