@@ -90,7 +90,7 @@ def project(grid, proj, cellsize=None, func="nearest", max_error=0.125):
 
     # Calculate cellsize, i.e. same number of cells along the diagonal.
     if cellsize is None:
-        src_diag = np.sqrt(grid.nrows ** 2 + grid.ncols ** 2)
+        src_diag = np.sqrt(grid.nrows**2 + grid.ncols**2)
         trg_diag = np.sqrt((lly - ury) ** 2 + (llx - urx) ** 2)
         cellsize = trg_diag / src_diag
 

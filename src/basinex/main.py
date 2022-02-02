@@ -162,7 +162,7 @@ def sameExtend(fobjs):
 
 
 def writeReport(bpath, mask, scaling_factor):
-    size = (np.sum(~mask.mask) * np.prod(np.abs(mask.cellsize))) * scaling_factor ** 2
+    size = (np.sum(~mask.mask) * np.prod(np.abs(mask.cellsize))) * scaling_factor**2
     with open(os.path.join(bpath, "report.out"), "w") as f:
         f.write("calculated_catchment_size: {:}\n".format(size))
 
