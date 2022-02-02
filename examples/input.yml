@@ -1,0 +1,25 @@
+outpath: output/
+flowacc: facc.asc
+flowdir: fdir.asc
+gauges: LUT.txt
+latitude-size-correction: True
+matching:
+  scaling_factor: 111.11
+  max_distance: 0.0625
+  max_error: 0.1
+mask:
+  fname: basin.asc
+  outpath: morph
+gauge:
+  fname: idgauges.asc
+  outpath: morph
+gridfiles:
+  - fname: facc.asc
+    outpath: morph
+ncfiles:
+  - fname: pre_monsum_1982_2016.nc
+    outpath: meteo
+    ydim: lat
+    xdim: lon
+    y_shift: 0.5
+    x_shift: 0.5

@@ -121,3 +121,4 @@ docs/source/generated/
 # other settings
 .vscode/
 *.DS_Store
+examples/output/
