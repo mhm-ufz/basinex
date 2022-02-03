@@ -2,5 +2,5 @@ prune *
 recursive-include src *.py *.pyx
 recursive-exclude src *.c *.cpp
 include LICENSE README.md pyproject.toml setup.py setup.cfg
-exclude CHANGELOG.md AUTHORS.md
+exclude CHANGELOG.md AUTHORS.md input.yml
 global-exclude __pycache__ *.py[cod] .*
