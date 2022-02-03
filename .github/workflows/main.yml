@@ -147,7 +147,7 @@ jobs:
 
       - name: Run tests
         run: |
-          basinex -c examples
+          basinex --verbose --cwd examples
 
   upload_to_pypi:
     needs: [build_wheels, build_sdist, test_wheel]
