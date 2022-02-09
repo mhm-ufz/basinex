@@ -4,7 +4,7 @@
 <img src="https://git.ufz.de/chs/logos/-/raw/master/basinex.png" alt="basinex-LOGO" width="251px" style="width:251px;"/>
 </div>
 
-The basin extractor. Extract basins for given gauging stations.
+The [mHM](https://mhm-ufz.org/) basin extractor. Extract basins for given gauging stations.
 
 
 ## Dependencies
