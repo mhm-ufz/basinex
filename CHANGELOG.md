@@ -3,11 +3,12 @@
 All notable changes to **basinex** will be documented in this file.
 
 
-## [0.1] - ?
+## [0.1] - 2022-02
 
 ### Enhancements
-- modern package structure
-- installable
+- modern package structure: https://github.com/mhm-ufz/basinex
+- added documentation: https://basinex.readthedocs.io
+- made installable: `pip install basinex`
 - added entry point for script usage
 - added `latitude-size-correction` switch to yaml file for basin area correction with latlon coordinates
 - added `--cwd` and `--version` to the basinex CLI
