@@ -1,0 +1,28 @@
+{
+  "license": "LGPL-3.0+",
+  "contributors": [
+      {
+          "affiliation": "Helmholtz Centre for Environmental Research UFZ",
+          "type": "Producer",
+          "name": "Sch\u00e4fer, David"
+      },
+      {
+          "orcid": "0000-0001-9060-4008",
+          "affiliation": "Helmholtz Centre for Environmental Research UFZ",
+          "type": "ProjectManager",
+          "name": "M\u00fcller, Sebastian"
+      }
+  ],
+  "language": "eng",
+  "keywords": [
+      "hydrology",
+      "basins",
+      "mHM"
+  ],
+  "creators": [
+      {
+          "affiliation": "Helmholtz Centre for Environmental Research UFZ",
+          "name": "mHM Developers"
+      }
+  ]
+}
