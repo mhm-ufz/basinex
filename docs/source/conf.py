@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
 import datetime
+
 from basinex import __version__ as ver
 
+# The full version, including alpha/beta/rc tags.
+# ver = re.sub("^v", "", os.popen("git describe --always --tags").read().strip())
 
 extensions = [
     "sphinx.ext.imgmath",
@@ -143,9 +145,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [
-    (master_doc, "basinex", "basinex Documentation", [author], 1)
-]
+man_pages = [(master_doc, "basinex", "basinex Documentation", [author], 1)]
 
 
 # -- Options for Texinfo output -------------------------------------------
