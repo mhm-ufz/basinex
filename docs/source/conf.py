@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import datetime
-
-from basinex import __version__ as ver
+import os
+import re
 
 # The full version, including alpha/beta/rc tags.
-# ver = re.sub("^v", "", os.popen("git describe --always --tags").read().strip())
+ver = re.sub("^v", "", os.popen("git describe --always --tags").read().strip())
 
 extensions = [
     "sphinx.ext.imgmath",
