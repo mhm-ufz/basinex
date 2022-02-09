@@ -26,7 +26,7 @@ Getting GDAL installed with pip is allways a bit cumbersome. Therefore we compil
 
 #### Ubuntu
 To get a recent version of GDAL, you can use the ppa of [ubuntugis](https://launchpad.net/~ubuntugis/+archive/ubuntu/ppa):
-```bash
+```
 sudo add-apt-repository ppa:ubuntugis/ppa
 sudo apt-get update
 sudo apt install gdal-bin libgdal-dev
@@ -36,7 +36,7 @@ pip install GDAL==$(gdal-config --version)
 
 #### MacOS
 GDAL can be installed with [homebrew](https://formulae.brew.sh/formula/gdal):
-```bash
+```
 brew install gdal
 pip install wheel numpy
 pip install GDAL==$(gdal-config --version)
@@ -45,7 +45,7 @@ pip install GDAL==$(gdal-config --version)
 #### Windows
 You can use the unoffical wheels of [Christoph Gohlke](https://www.lfd.uci.edu/~gohlke/pythonlibs/) to install GDAL.
 The easiest way to do so, is using [pipwin](https://github.com/lepisma/pipwin):
-```bash
+```
 pip install pipwin
 pipwin install gdal
 ```
@@ -64,7 +64,7 @@ Then you can execute `basinex` in that conda environment.
 
 Here is a short introduction about how to use the basin extractor.
 Have a look at the example directory or try it out directly with:
-```bash
+```
 basinex -c examples
 ```
 
@@ -73,7 +73,7 @@ A command line script `basinex` will be installed with this package.
 You can execute it in your terminal and it will search for an `input.yml` file in your current directory.
 
 To get more information about how to use the command line interface, you can have a look at the help message:
-```bash
+```
 $ basinex -h
 usage: basinex [-h] [-n LINE] [-i INPUT] [-v] [-c CWD] [--version]
 

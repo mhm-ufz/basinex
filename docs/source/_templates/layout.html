@@ -1,0 +1,23 @@
+{% extends "!layout.html" %}
+  {% block menu %}
+    <p class="link caption"><span class="link caption-text">Documentation</span></p>
+    {{ super() }}
+    <br />
+    <p class="link caption"><span class="link caption-text">basinex Links</span></p>
+    <ul>
+      <Li><a href="https://github.com/mhm-ufz/basinex">basinex GitHub</a></Li>
+      <Li><a href="https://zenodo.org/">basinex Zenodo DOI</a></Li>
+      <Li><a href="https://pypi.org/project/basinex/">basinex PyPI</a></Li>
+    </ul>
+    <br />
+    <p class="link caption"><span class="link caption-text">mHM Links</span></p>
+    <ul>
+      <Li><a href="https://mhm-ufz.org">mHM Website</a></Li>
+      <Li><a href="https://git.ufz.de/mhm/mhm">mHM GitLab</a></Li>
+    </ul>
+    <br />
+    <br />
+    <ul>
+      <Li><a href="contents.html">Sitemap</a></Li>
+    </ul>
+    {% endblock %}
