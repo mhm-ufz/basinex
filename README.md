@@ -1,3 +1,9 @@
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6025795.svg)](https://doi.org/10.5281/zenodo.6025795)
+[![PyPI version](https://badge.fury.io/py/basinex.svg)](https://badge.fury.io/py/basinex)
+[![Continuous Integration](https://github.com/mhm-ufz/basinex/actions/workflows/main.yml/badge.svg)](https://github.com/mhm-ufz/basinex/actions/workflows/main.yml)
+[![Documentation Status](https://readthedocs.org/projects/basinex/badge/?version=latest)](https://basinex.readthedocs.io/en/latest/?badge=latest)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
+
 # basinex
 
 <div align="center">
