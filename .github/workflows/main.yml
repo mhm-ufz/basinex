@@ -143,7 +143,7 @@ jobs:
 
       - name: Install
         run: |
-          pip install --find-links dist/ basinex
+          pip install --pre --find-links dist/ basinex
 
       - name: Run tests
         run: |

@@ -161,10 +161,15 @@ def sameExtend(fobjs):
     return True
 
 
-def writeReport(bpath, mask, scaling_factor):
+def writeReport(bpath, mask, scaling_factor, gauge):
     size = (np.sum(~mask.mask) * np.prod(np.abs(mask.cellsize))) * scaling_factor**2
+    error_size = (size - gauge.size) / gauge.size * 100
     with open(os.path.join(bpath, "report.out"), "w") as f:
         f.write("calculated_catchment_size: {:}\n".format(size))
+        f.write("input_catchment_size     : {:}\n".format(gauge.size))
+        f.write("error_catchment_size (%) : {:}\n".format(error_size))
+        f.write("adjusted_y               : {:}\n".format(gauge.y))
+        f.write("adjusted_x               : {:}\n".format(gauge.x))
 
 
 def maskData(data, mask):
@@ -258,7 +263,7 @@ def main(config, gauges):
         bpath = os.path.join(config["outpath"], gauge.id)
         writeFiles(bpath, filedict)
         logging.debug("writing report")
-        writeReport(bpath, mask, config["matching"]["scaling_factor"])
+        writeReport(bpath, mask, config["matching"]["scaling_factor"], gauge)
 
 
 def initArgparser():
