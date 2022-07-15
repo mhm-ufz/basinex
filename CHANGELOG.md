@@ -28,6 +28,6 @@ All notable changes to **basinex** will be documented in this file.
 ### Bugfixes
 - solved yaml warnings
 
-[Unreleased]: https://github.com/mhm-ufz/basinex/compare/v0.1...HEAD
-[0.2]: https://github.com/mhm-ufz/basinex/compare/v0.1...v0.2
-[0.1]: https://github.com/mhm-ufz/basinex/releases/tag/0.1
+[Unreleased]: https://github.com/mhm-ufz/basinex/compare/v0.2.0...HEAD
+[0.2]: https://github.com/mhm-ufz/basinex/compare/v0.1.0...v0.2.0
+[0.1]: https://github.com/mhm-ufz/basinex/releases/tag/v0.1.0
