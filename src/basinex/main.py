@@ -224,12 +224,12 @@ def main(config, gauges):
             logging.debug("reding gauge file")
             mask = gridBasinMask(gauge)
 
-        for fdict in config["gridfiles"]:
+        for fdict in config.get("gridfiles", []):
             logging.debug("processing: %s", fdict["fname"])
             griddata = ga.fromfile(fdict["fname"]).shrink(**mask.bbox)
             filedict[GridFile(**fdict)] = maskData(griddata, mask)
 
-        for fdict in config["ncfiles"]:
+        for fdict in config.get("ncfiles", []):
             logging.debug("processing: %s", fdict["fname"])
             fitem = NcFile(**fdict)
             ncdata = NcDimDataset(
