@@ -2,6 +2,15 @@
 
 All notable changes to **basinex** will be documented in this file.
 
+## [0.2] - 2022-07
+
+### Enhancements
+- updated `report.out` with catchment area comparison and adjusted x, y of gauges ([#3](https://github.com/mhm-ufz/basinex/pull/3))
+- `mask`, `gauge`, `gridfiles` and `ncfiles` are truly optional now ([#4](https://github.com/mhm-ufz/basinex/pull/4))
+
+### Bugfixes
+- `netcdf4` version needs to be `<1.6`, so we added a restriction to `setup.cfg` ([#3](https://github.com/mhm-ufz/basinex/pull/3))
+
 
 ## [0.1] - 2022-02
 
@@ -19,6 +28,6 @@ All notable changes to **basinex** will be documented in this file.
 ### Bugfixes
 - solved yaml warnings
 
-[Unreleased]: https://github.com/mhm-ufz/basinex/compare/v0.1...HEAD
-[0.2]: https://github.com/mhm-ufz/basinex/compare/v0.1...v0.2
-[0.1]: https://github.com/mhm-ufz/basinex/releases/tag/0.1
+[Unreleased]: https://github.com/mhm-ufz/basinex/compare/v0.2.0...HEAD
+[0.2]: https://github.com/mhm-ufz/basinex/compare/v0.1.0...v0.2.0
+[0.1]: https://github.com/mhm-ufz/basinex/releases/tag/v0.1.0
