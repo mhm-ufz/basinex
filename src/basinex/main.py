@@ -164,6 +164,7 @@ def sameExtend(fobjs):
 def writeReport(bpath, mask, scaling_factor, gauge):
     size = (np.sum(~mask.mask) * np.prod(np.abs(mask.cellsize))) * scaling_factor**2
     error_size = (size - gauge.size) / gauge.size * 100
+    Path(bpath).mkdir(exist_ok=True, parents=True)
     with open(os.path.join(bpath, "report.out"), "w") as f:
         f.write("calculated_catchment_size: {:}\n".format(size))
         f.write("input_catchment_size     : {:}\n".format(gauge.size))
@@ -251,14 +252,15 @@ def main(config, gauges):
             )
             filedict[fitem] = mask
 
-        logging.debug("finding common extend")
-        bbox = commonBbox(tuple(filedict.values()))
+        if filedict:
+            logging.debug("finding common extend")
+            bbox = commonBbox(tuple(filedict.values()))
 
-        logging.debug("enlarging data to common extend")
-        filedict = enlargeFiles(filedict, bbox)
+            logging.debug("enlarging data to common extend")
+            filedict = enlargeFiles(filedict, bbox)
 
-        if not sameExtend(tuple(filedict.values())):
-            raise RuntimeError("incompatible cellsizes")
+            if not sameExtend(tuple(filedict.values())):
+                raise RuntimeError("incompatible cellsizes")
 
         bpath = os.path.join(config["outpath"], gauge.id)
         writeFiles(bpath, filedict)
