@@ -186,6 +186,9 @@ def maskData(data, mask):
 
 def main(config, gauges):
 
+    flowacc = None
+    flowdir = None
+
     for gauge in gauges:
         logging.info("processing gauge: %s", gauge.id)
 
@@ -194,11 +197,13 @@ def main(config, gauges):
         if not gauge.path:
 
             # create mask if not given
-            logging.debug("reading flow accumulation")
-            flowacc = ga.fromfile(config["flowacc"]).astype(np.int32)
+            if flowacc is None:
+                logging.debug("reading flow accumulation")
+                flowacc = ga.fromfile(config["flowacc"]).astype(np.int32)
 
-            logging.debug("reading flow direction")
-            flowdir = ga.fromfile(config["flowdir"]).astype(np.int32)
+            if flowdir is None:
+                logging.debug("reading flow direction")
+                flowdir = ga.fromfile(config["flowdir"]).astype(np.int32)
 
             if gauge.size:
                 logging.debug("moving gauge to streamflow")
