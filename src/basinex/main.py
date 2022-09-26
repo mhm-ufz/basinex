@@ -174,7 +174,7 @@ def writeReport(bpath, mask, scaling_factor, gauge):
 
 
 def maskData(data, mask):
-    if all(x == y for x, y in zip(mask.cellsize, data.cellsize)):
+    if all(np.isclose(x, y) for x, y in zip(mask.cellsize, data.cellsize)):
         return data.setMask(mask.mask)
 
     enlarged_mask = mask.enlarge(**data.bbox).astype(float)
