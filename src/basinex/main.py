@@ -153,7 +153,7 @@ def gaugeGrid(grid_template, gauge):
     return out
 
 
-def sameExtend(fobjs):
+def sameExtent(fobjs):
     bbox = commonBbox(fobjs)
     for fobj in fobjs:
         if fobj.bbox != bbox:
@@ -227,7 +227,7 @@ def main(config, gauges):
                 filedict[fitem] = maskData(gaugefile, mask)
 
         else:
-            logging.debug("reding gauge file")
+            logging.debug("reading gauge file")
             mask = gridBasinMask(gauge)
 
         for fdict in config.get("gridfiles", []):
@@ -258,13 +258,13 @@ def main(config, gauges):
             filedict[fitem] = mask
 
         if filedict:
-            logging.debug("finding common extend")
+            logging.debug("finding common extent")
             bbox = commonBbox(tuple(filedict.values()))
 
-            logging.debug("enlarging data to common extend")
+            logging.debug("enlarging data to common extent")
             filedict = enlargeFiles(filedict, bbox)
 
-            if not sameExtend(tuple(filedict.values())):
+            if not sameExtent(tuple(filedict.values())):
                 raise RuntimeError("incompatible cellsizes")
 
         bpath = os.path.join(config["outpath"], gauge.id)

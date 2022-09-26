@@ -152,13 +152,13 @@ ncfiles:
     - `path`:    path to the mask file
     - `varname`: name of the mask variable (optional, only needed if the mask is stored in a netcdf file)
 - `latitude-size-correction: False` - **Optional**:
-  perform a latitude correction for the given basin size (default: False)
+  perform a latitude correction for the basin size of a given gauge (default: False)
   - `AREA = N_cells * res_x * ( cos(LAT) * res_y ) * scaling factor^2`
 - `matching:` - **Required**: gauge matching parameters
   - **Note**:
     The gauge matching is based on the flowaccumulation data. The value for
     any given cell in the flowaccumulation grid is interpreted as the size
-    [in cells] of a river basin drainig into the respective cell.
+    [in cells] of a river basin draining into the respective cell.
     During gauge matching the flowaccumulation grid is searched for a cell
     with a corresponding basin size close to the given gauge basin size. The
     search radius will be increased succesively and can be limited to a

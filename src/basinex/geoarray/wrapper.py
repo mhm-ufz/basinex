@@ -190,7 +190,7 @@ def full(shape, value, dtype=np.float64, *args, **kwargs):
     Arguments
     ---------
     shape        : tuple          # shape of the returned grid
-    fill_value   : scalar         # fille value
+    fill_value   : scalar         # fill value
 
     Optional Arguments
     ------------------
