@@ -145,9 +145,14 @@ def commonBbox(fobjs):
     return bbox
 
 
-def gaugeGrid(grid_template, gauge):
-    out = ga.full_like(grid_template, grid_template.fill_value)
+def gaugeGrid(grid_template, gauge, out_in=None):
+    if out_in is None:
+        out = ga.full_like(grid_template, grid_template.fill_value)
+    else:
+        out = out_in
     idx = out.indexOf(gauge.y, gauge.x)
+    if out_in is not None and not out.mask[idx]:
+        warnings.warn(f"There is already a gauge at {idx}, with id '{out.data[idx]}', replacing it by '{gauge.id}'.")
     out.data[idx] = gauge.id
     out.mask[idx] = False
     return out
@@ -161,16 +166,17 @@ def sameExtent(fobjs):
     return True
 
 
-def writeReport(bpath, mask, scaling_factor, gauge):
-    size = (np.sum(~mask.mask) * np.prod(np.abs(mask.cellsize))) * scaling_factor**2
-    error_size = (size - gauge.size) / gauge.size * 100
+def writeReport(bpath, updated_gauge, gauge, error):
     Path(bpath).mkdir(exist_ok=True, parents=True)
     with open(os.path.join(bpath, "report.out"), "w") as f:
-        f.write("calculated_catchment_size: {:}\n".format(size))
+        f.write("error_catchment_size (%) : {:}\n".format(error))
+        if updated_gauge is not None:
+            f.write("new_catchment_size       : {:}\n".format(updated_gauge.size))
+            f.write("new_y                    : {:}\n".format(updated_gauge.y))
+            f.write("new_x                    : {:}\n".format(updated_gauge.x))
         f.write("input_catchment_size     : {:}\n".format(gauge.size))
-        f.write("error_catchment_size (%) : {:}\n".format(error_size))
-        f.write("adjusted_y               : {:}\n".format(gauge.y))
-        f.write("adjusted_x               : {:}\n".format(gauge.x))
+        f.write("input_y                  : {:}\n".format(gauge.y))
+        f.write("input_x                  : {:}\n".format(gauge.x))
 
 
 def maskData(data, mask):
@@ -188,6 +194,9 @@ def main(config, gauges):
 
     flowacc = None
     flowdir = None
+    filedict_main = {}
+    gaugefile_main = None
+    updated_gauge = None
 
     for gauge in gauges:
         logging.info("processing gauge: %s", gauge.id)
@@ -199,7 +208,7 @@ def main(config, gauges):
             # create mask if not given
             if flowacc is None:
                 logging.debug("reading flow accumulation")
-                flowacc = ga.fromfile(config["flowacc"]).astype(np.int32)
+                flowacc = ga.fromfile(config["flowacc"])
 
             if flowdir is None:
                 logging.debug("reading flow direction")
@@ -207,23 +216,32 @@ def main(config, gauges):
 
             if gauge.size:
                 logging.debug("moving gauge to streamflow")
-                gauge = matchFlowacc(gauge, flowacc, **config["matching"])
+                updated_gauge, error = matchFlowacc(gauge, flowacc, **config["matching"])
 
-            if not gauge:
+            if not updated_gauge:
                 warnings.warn("Failed to match the gauge to the flow accumulation grid")
                 continue
 
             logging.debug("generating basin mask")
-            mask = gaugeBasinMask(flowdir, gauge)
+            mask = gaugeBasinMask(flowdir, updated_gauge)
 
             # write gauge grid if desired
             if "gauge" in config:
                 logging.debug("writing gauge file")
+                fname = config["gauge"].get("fname", "idgauges.asc")
+                if len(gauges) > 1:
+                    if gaugefile_main is None:
+                        fitem_main = GridFile(
+                            fname=fname,
+                            outpath=config["gauge"].get("outpath"),
+                        )
+                    gaugefile_main = gaugeGrid(flowacc, updated_gauge, gaugefile_main)
+                    filedict_main[fitem_main] = gaugefile_main
                 fitem = GridFile(
-                    fname=config["gauge"].get("fname", "idgauges.asc"),
+                    fname=fname,
                     outpath=config["gauge"].get("outpath"),
                 )
-                gaugefile = gaugeGrid(flowacc, gauge).shrink(**mask.bbox)
+                gaugefile = gaugeGrid(flowacc, updated_gauge).shrink(**mask.bbox)
                 filedict[fitem] = maskData(gaugefile, mask)
 
         else:
@@ -270,7 +288,9 @@ def main(config, gauges):
         bpath = os.path.join(config["outpath"], gauge.id)
         writeFiles(bpath, filedict)
         logging.debug("writing report")
-        writeReport(bpath, mask, config["matching"]["scaling_factor"], gauge)
+        writeReport(bpath, updated_gauge, gauge, error)
+
+    writeFiles(config["outpath"], filedict_main)
 
 
 def initArgparser():

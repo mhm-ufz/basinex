@@ -99,4 +99,6 @@ def matchFlowacc(gauge, facc, max_distance, max_error, scaling_factor=1):
 
         # the cell cordinates
         y, x = grid.coordinatesOf(river_cells_y[nn], river_cells_x[nn])
-        return Gauge(id=gauge.id, y=y, x=x, size=size)
+        return Gauge(id=gauge.id, y=y, x=x, size=grid.data[river_cells_y[nn], river_cells_x[nn]]), error
+    else:
+        return None, error
