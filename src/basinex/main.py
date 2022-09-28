@@ -148,6 +148,7 @@ def commonBbox(fobjs):
 def gaugeGrid(grid_template, gauge, out_in=None):
     if out_in is None:
         out = ga.full_like(grid_template, grid_template.fill_value)
+        out._fobj = None
     else:
         out = out_in
     idx = out.indexOf(gauge.y, gauge.x)
