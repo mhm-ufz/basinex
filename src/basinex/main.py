@@ -170,8 +170,8 @@ def sameExtent(fobjs):
     return True
 
 
-def writeReport(bpath, updated_gauge, gauge, error, do_write=False):
-    if do_write:        
+def writeReport(bpath, updated_gauge, gauge, error):
+    if logging.DEBUG >= logging.root.level:        
         Path(bpath).mkdir(exist_ok=True, parents=True)
         with open(os.path.join(bpath, "report.out"), "w") as f:
             f.write("error_catchment_size (%) : {:}\n".format(error))
