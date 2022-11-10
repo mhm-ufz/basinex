@@ -16,6 +16,7 @@ The [mHM](https://mhm-ufz.org/) basin extractor. Extract basins for given gaugin
 ## Dependencies
 
 - numpy v1.14.5 or later
+- pandas
 - netCDF4
 - GDAL
 - pyyaml
@@ -36,7 +37,7 @@ To get a recent version of GDAL, you can use the ppa of [ubuntugis](https://laun
 sudo add-apt-repository ppa:ubuntugis/ppa
 sudo apt-get update
 sudo apt install gdal-bin libgdal-dev
-pip install wheel numpy
+pip install wheel numpy pandas
 pip install GDAL==$(gdal-config --version)
 ```
 
@@ -44,7 +45,7 @@ pip install GDAL==$(gdal-config --version)
 GDAL can be installed with [homebrew](https://formulae.brew.sh/formula/gdal):
 ```
 brew install gdal
-pip install wheel numpy
+pip install wheel numpy pandas
 pip install GDAL==$(gdal-config --version)
 ```
 
@@ -60,7 +61,7 @@ pipwin install gdal
 It is best to use basinex with conda to have gdal and NetCDF installed properly.
 To use the development version of basinex, download this repository and do the following in your conda environment:
 
-    conda install -y gdal netcdf4 pyyaml cxx-compiler
+    conda install -y gdal netcdf4 pyyaml cxx-compiler pandas
     pip install .
 
 Then you can execute `basinex` in that conda environment.
@@ -152,13 +153,13 @@ ncfiles:
     - `path`:    path to the mask file
     - `varname`: name of the mask variable (optional, only needed if the mask is stored in a netcdf file)
 - `latitude-size-correction: False` - **Optional**:
-  perform a latitude correction for the given basin size (default: False)
+  perform a latitude correction for the basin size of a given gauge (default: False)
   - `AREA = N_cells * res_x * ( cos(LAT) * res_y ) * scaling factor^2`
 - `matching:` - **Required**: gauge matching parameters
   - **Note**:
     The gauge matching is based on the flowaccumulation data. The value for
     any given cell in the flowaccumulation grid is interpreted as the size
-    [in cells] of a river basin drainig into the respective cell.
+    [in cells] of a river basin draining into the respective cell.
     During gauge matching the flowaccumulation grid is searched for a cell
     with a corresponding basin size close to the given gauge basin size. The
     search radius will be increased succesively and can be limited to a

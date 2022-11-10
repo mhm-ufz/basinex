@@ -4,6 +4,9 @@ from math import ceil, floor
 
 import numpy as np
 
+# precision for rounding to avoid numerical instabilities
+PRECISION = 10
+
 
 class SpatialMixin(object):
     def trim(self):
@@ -83,10 +86,10 @@ class SpatialMixin(object):
         }
 
         cellsize = [float(abs(cs)) for cs in self.cellsize]
-        top = floor((self.bbox["ymax"] - bbox["ymax"]) / cellsize[0])
-        left = floor((bbox["xmin"] - self.bbox["xmin"]) / cellsize[1])
-        bottom = floor((bbox["ymin"] - self.bbox["ymin"]) / cellsize[0])
-        right = floor((self.bbox["xmax"] - bbox["xmax"]) / cellsize[1])
+        top = floor(round((self.bbox["ymax"] - bbox["ymax"]) / cellsize[0], PRECISION))
+        left = floor(round((bbox["xmin"] - self.bbox["xmin"]) / cellsize[1], PRECISION))
+        bottom = floor(round((bbox["ymin"] - self.bbox["ymin"]) / cellsize[0], PRECISION))
+        right = floor(round((self.bbox["xmax"] - bbox["xmax"]) / cellsize[1], PRECISION))
 
         return self.removeCells(
             max(top, 0), max(left, 0), max(bottom, 0), max(right, 0)
@@ -175,10 +178,10 @@ class SpatialMixin(object):
 
         cellsize = [float(abs(cs)) for cs in self.cellsize]
 
-        top = ceil((bbox["ymax"] - self.bbox["ymax"]) / cellsize[0])
-        left = ceil((self.bbox["xmin"] - bbox["xmin"]) / cellsize[1])
-        bottom = ceil((self.bbox["ymin"] - bbox["ymin"]) / cellsize[0])
-        right = ceil((bbox["xmax"] - self.bbox["xmax"]) / cellsize[1])
+        top = ceil(round((bbox["ymax"] - self.bbox["ymax"]) / cellsize[0], PRECISION))
+        left = ceil(round((self.bbox["xmin"] - bbox["xmin"]) / cellsize[1], PRECISION))
+        bottom = ceil(round((self.bbox["ymin"] - bbox["ymin"]) / cellsize[0], PRECISION))
+        right = ceil(round((bbox["xmax"] - self.bbox["xmax"]) / cellsize[1], PRECISION))
 
         return self.addCells(max(top, 0), max(left, 0), max(bottom, 0), max(right, 0))
 

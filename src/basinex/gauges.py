@@ -10,9 +10,9 @@ class Gauge(object):
         self, id, y=None, x=None, size=None, path=None, varname=None, lat_fix=False
     ):
         self.id = id
-        self.y = y
-        self.x = x
-        self.size = float(size) / np.cos(np.deg2rad(float(y))) if lat_fix else size
+        self.y = float(y)
+        self.x = float(x)
+        self.size = float(size) / np.cos(np.deg2rad(self.y)) if lat_fix else float(size)
         self.path = path
         self.varname = varname
 
@@ -66,9 +66,9 @@ def matchFlowacc(gauge, facc, max_distance, max_error, scaling_factor=1):
           to convert from map units to km^2 of the catchment area
     """
     # print "gauge before:", gauge.y, gauge.x
-    y = float(gauge.y)
-    x = float(gauge.x)
-    size = float(gauge.size)
+    y = gauge.y
+    x = gauge.x
+    size = gauge.size
     bbox = {
         "ymin": y - max_distance,
         "ymax": y + max_distance,
@@ -99,4 +99,6 @@ def matchFlowacc(gauge, facc, max_distance, max_error, scaling_factor=1):
 
         # the cell cordinates
         y, x = grid.coordinatesOf(river_cells_y[nn], river_cells_x[nn])
-        return Gauge(id=gauge.id, y=y, x=x, size=size)
+        return Gauge(id=gauge.id, y=y, x=x, size=grid.data[river_cells_y[nn], river_cells_x[nn]]), error
+    else:
+        return None, error
