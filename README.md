@@ -16,6 +16,7 @@ The [mHM](https://mhm-ufz.org/) basin extractor. Extract basins for given gaugin
 ## Dependencies
 
 - numpy v1.14.5 or later
+- pandas
 - netCDF4
 - GDAL
 - pyyaml
@@ -36,7 +37,7 @@ To get a recent version of GDAL, you can use the ppa of [ubuntugis](https://laun
 sudo add-apt-repository ppa:ubuntugis/ppa
 sudo apt-get update
 sudo apt install gdal-bin libgdal-dev
-pip install wheel numpy
+pip install wheel numpy pandas
 pip install GDAL==$(gdal-config --version)
 ```
 
@@ -44,7 +45,7 @@ pip install GDAL==$(gdal-config --version)
 GDAL can be installed with [homebrew](https://formulae.brew.sh/formula/gdal):
 ```
 brew install gdal
-pip install wheel numpy
+pip install wheel numpy pandas
 pip install GDAL==$(gdal-config --version)
 ```
 
@@ -60,7 +61,7 @@ pipwin install gdal
 It is best to use basinex with conda to have gdal and NetCDF installed properly.
 To use the development version of basinex, download this repository and do the following in your conda environment:
 
-    conda install -y gdal netcdf4 pyyaml cxx-compiler
+    conda install -y gdal netcdf4 pyyaml cxx-compiler pandas
     pip install .
 
 Then you can execute `basinex` in that conda environment.
